@@ -167,6 +167,89 @@ export default function SettingsModal({
     return 'space-y-1 bg-white dark:bg-zinc-900/60 p-3.5 rounded-xl border border-slate-200/60 dark:border-zinc-800/60 flex-1 flex flex-col justify-center items-center';
   };
 
+  const getToggleButtonClass = (isActive: boolean) => {
+    if (isActive) {
+      if (isBrutalist) {
+        return `${stylePrefs.buttonClass} !bg-black !text-white dark:!bg-white dark:!text-black !shadow-none translate-x-[1px] translate-y-[1px] font-black`;
+      }
+      if (isRetro) {
+        return `${stylePrefs.buttonClass} !bg-[#33ff33] !text-black font-bold shadow-[0_0_12px_rgba(51,255,51,0.6)]`;
+      }
+      if (stylePrefs.id === 'cyberpunk') {
+        return `${stylePrefs.buttonClass} !bg-[#fff000] !text-black font-extrabold shadow-[3px_3px_0_#ff0055] border-0`;
+      }
+      if (stylePrefs.id === 'neumorphic') {
+        return `${stylePrefs.buttonClass} !shadow-[inset_3px_3px_6px_#bebebe,inset_-3px_-3px_6px_#ffffff] dark:!shadow-[inset_3px_3px_6px_#131313,inset_-3px_-3px_6px_#292929] text-indigo-650 dark:text-indigo-400 font-extrabold`;
+      }
+      if (stylePrefs.id === 'glassmorphism') {
+        return `${stylePrefs.buttonClass} !bg-white/40 dark:!bg-white/20 border-white/40 text-indigo-955 dark:text-white font-bold shadow-sm`;
+      }
+      if (stylePrefs.id === 'gradient_heavy') {
+        return `${stylePrefs.buttonClass} !bg-gradient-to-r !from-pink-500 !via-purple-500 !to-indigo-500 text-white font-extrabold`;
+      }
+      if (stylePrefs.id === 'organic') {
+        return `${stylePrefs.buttonClass} !bg-[#5b6b55] !text-[#eed] font-serif shadow-xs`;
+      }
+      if (stylePrefs.id === 'elegant') {
+        return `${stylePrefs.buttonClass} !bg-[#3c2a21] !text-white border-[#3c2a21]`;
+      }
+      if (stylePrefs.id === 'luxury') {
+        return `${stylePrefs.buttonClass} !bg-gradient-to-r !from-[#c5a881] !to-[#b19267] !text-black font-black`;
+      }
+      if (stylePrefs.id === 'flat') {
+        return `${stylePrefs.buttonClass} !bg-indigo-600 !text-white border-0`;
+      }
+      if (stylePrefs.id === 'high_tech') {
+        return `${stylePrefs.buttonClass} !bg-[#39ff14]/20 !border-[#39ff14] text-[#39ff14] shadow-[0_0_8px_rgba(57,255,20,0.25)]`;
+      }
+      if (stylePrefs.id === 'vintage') {
+        return `${stylePrefs.buttonClass} !bg-[#3e2723] !text-white !border-[#3e2723]`;
+      }
+      if (stylePrefs.id === 'industrial') {
+        return `${stylePrefs.buttonClass} !bg-[#f7931f] !text-[#151515] !border-t-[#ffb85d]`;
+      }
+      if (stylePrefs.id === 'artistic') {
+        return `${stylePrefs.buttonClass} !bg-gradient-to-r !from-rose-500 !to-indigo-500 !text-white shadow-md`;
+      }
+      if (stylePrefs.id === 'material') {
+        return `${stylePrefs.buttonClass} !bg-[#6200ee] dark:!bg-teal-500 !text-white`;
+      }
+      if (stylePrefs.id === 'playful') {
+        return `${stylePrefs.buttonClass} !bg-[#ff4b73] !text-white`;
+      }
+      return `${stylePrefs.buttonClass} border-indigo-650 bg-indigo-50/15 dark:bg-indigo-950/10 shadow-sm ring-1 ring-indigo-500/10 font-bold`;
+    } else {
+      if (isBrutalist) {
+        return `${stylePrefs.buttonClass} !bg-white dark:!bg-zinc-900 !text-black dark:!text-white opacity-60 hover:opacity-100`;
+      }
+      if (isRetro) {
+        return `${stylePrefs.buttonClass} !text-[#33ff33]/50 !border-[#33ff33]/30 hover:!text-[#33ff33] hover:!border-[#33ff33]/60`;
+      }
+      if (stylePrefs.id === 'cyberpunk') {
+        return `${stylePrefs.buttonClass} !bg-black/40 !text-[#ff0055]/70 !border-[#ff0055]/50 hover:!text-[#00ffcc] hover:!border-[#00ffcc]`;
+      }
+      if (stylePrefs.id === 'neumorphic') {
+        return `${stylePrefs.buttonClass} opacity-60 hover:opacity-90`;
+      }
+      if (stylePrefs.id === 'glassmorphism') {
+        return `${stylePrefs.buttonClass} !bg-white/10 dark:!bg-black/20 opacity-60 hover:opacity-90`;
+      }
+      if (stylePrefs.id === 'organic') {
+        return `${stylePrefs.buttonClass} !bg-transparent !text-[#5b6b55] !border-[#c2cdc0] opacity-75 hover:opacity-100`;
+      }
+      if (stylePrefs.id === 'elegant') {
+        return `${stylePrefs.buttonClass} !bg-transparent !text-[#1a120c] dark:!text-[#f3dfca]/80 opacity-60 hover:opacity-90`;
+      }
+      if (stylePrefs.id === 'luxury') {
+        return `${stylePrefs.buttonClass} !bg-[#0d0e12] !text-[#c5a881]/70 !border-[#c5a881]/30 hover:!text-[#c5a881] hover:!border-[#c5a881]`;
+      }
+      if (stylePrefs.id === 'high_tech') {
+        return `${stylePrefs.buttonClass} !bg-[#06080c] !text-[#39ff14]/50 !border-[#1b2029] hover:!text-[#39ff14] hover:!border-[#39ff14]/50`;
+      }
+      return `${stylePrefs.buttonClass} opacity-50 hover:opacity-90`;
+    }
+  };
+
   const toggleCheckedClass = useMemo(() => {
     if (isRetro) return 'peer-checked:bg-[#33ff33]';
     if (stylePrefs.id === 'cyberpunk' || stylePrefs.id === 'geometric') return 'peer-checked:bg-[#ff0055]';
@@ -489,22 +572,14 @@ export default function SettingsModal({
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={() => onUpdatePrefs({ ...prefs, theme: 'light' })}
-                      className={
-                        prefs.theme === 'light'
-                          ? `${stylePrefs.buttonClass} border-indigo-650 bg-indigo-50/15 dark:bg-indigo-950/10 shadow-sm ring-1 ring-indigo-500/10`
-                          : `${stylePrefs.buttonClass} opacity-50 hover:opacity-90`
-                      }
+                      className={getToggleButtonClass(prefs.theme === 'light')}
                     >
                       <Sun size={14} />
                       <span>Light</span>
                     </button>
                     <button
                       onClick={() => onUpdatePrefs({ ...prefs, theme: 'dark' })}
-                      className={
-                        prefs.theme === 'dark'
-                          ? `${stylePrefs.buttonClass} border-indigo-650 bg-indigo-50/15 dark:bg-indigo-950/10 shadow-sm ring-1 ring-indigo-500/10`
-                          : `${stylePrefs.buttonClass} opacity-50 hover:opacity-90`
-                      }
+                      className={getToggleButtonClass(prefs.theme === 'dark')}
                     >
                       <Moon size={14} />
                       <span>Dark</span>
@@ -522,22 +597,14 @@ export default function SettingsModal({
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={() => onUpdatePrefs({ ...prefs, noteListLayout: 'normal' })}
-                    className={
-                      (prefs.noteListLayout || 'normal') === 'normal'
-                        ? `${stylePrefs.buttonClass} flex flex-col items-center justify-center p-3 text-center border-indigo-650 bg-indigo-50/15 dark:bg-indigo-950/10 shadow-sm ring-1 ring-indigo-500/10`
-                        : `${stylePrefs.buttonClass} opacity-50 hover:opacity-90 flex flex-col items-center justify-center p-3 text-center`
-                    }
+                    className={`${getToggleButtonClass((prefs.noteListLayout || 'normal') === 'normal')} flex flex-col items-center justify-center p-3 text-center`}
                   >
                     <span className="font-bold text-[10.5px] uppercase tracking-wider mb-0.5">Normal Layout</span>
                     <span className="text-[9px] opacity-70 text-center leading-tight">Large cards, centered iconography & metadata</span>
                   </button>
                   <button
                     onClick={() => onUpdatePrefs({ ...prefs, noteListLayout: 'compact' })}
-                    className={
-                      (prefs.noteListLayout || 'normal') === 'compact'
-                        ? `${stylePrefs.buttonClass} flex flex-col items-center justify-center p-3 text-center border-indigo-650 bg-indigo-50/15 dark:bg-indigo-950/10 shadow-sm ring-1 ring-indigo-500/10`
-                        : `${stylePrefs.buttonClass} opacity-50 hover:opacity-90 flex flex-col items-center justify-center p-3 text-center`
-                    }
+                    className={`${getToggleButtonClass((prefs.noteListLayout || 'normal') === 'compact')} flex flex-col items-center justify-center p-3 text-center`}
                   >
                     <span className="font-bold text-[10.5px] uppercase tracking-wider mb-0.5">Compact List</span>
                     <span className="text-[9px] opacity-70 text-center leading-tight">High-density standard vertical listings</span>
@@ -587,11 +654,7 @@ export default function SettingsModal({
                         ...prefs,
                         syntaxTheme: syntax.id as SyntaxTheme
                       })}
-                      className={
-                        (prefs.syntaxTheme || 'dracula') === syntax.id
-                          ? `${stylePrefs.buttonClass} border-indigo-650 bg-indigo-50/15 dark:bg-indigo-950/10 font-black`
-                          : `${stylePrefs.buttonClass} opacity-50 hover:opacity-90`
-                      }
+                      className={getToggleButtonClass((prefs.syntaxTheme || 'dracula') === syntax.id)}
                     >
                       {syntax.label}
                     </button>
@@ -615,11 +678,7 @@ export default function SettingsModal({
                           ...prefs,
                           typography: { ...prefs.typography, family: font.id }
                         })}
-                        className={
-                          prefs.typography.family === font.id
-                            ? `${stylePrefs.buttonClass} ${font.class} border-indigo-650 bg-indigo-50/15 dark:bg-indigo-950/10 font-bold`
-                            : `${stylePrefs.buttonClass} ${font.class} opacity-50 hover:opacity-90`
-                        }
+                        className={`${getToggleButtonClass(prefs.typography.family === font.id)} ${font.class}`}
                       >
                         {font.label}
                       </button>
