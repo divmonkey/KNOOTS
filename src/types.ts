@@ -24,6 +24,7 @@ export interface Note {
 export interface TagDefinition {
   name: string;
   color: string; // 'slate', 'indigo', 'emerald', 'amber', 'rose', 'violet', 'cyan' or any custom HEX code
+  icon?: string;
 }
 
 export interface Folder {

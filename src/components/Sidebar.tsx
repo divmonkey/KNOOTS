@@ -82,63 +82,50 @@ export function getActiveNoteColor(note: Note, tagDefinitions: TagDefinition[]):
   return note.color || 'slate';
 }
 
-// Aesthetic note card styling helper
-const getThemeClasses = (note: Note, isActive: boolean, tagDefinitions: TagDefinition[]) => {
-  const colorNameOrHex = getActiveNoteColor(note, tagDefinitions);
-
-  const colors: Record<string, { active: string; inactive: string }> = {
-    slate: {
-      active: 'border-slate-400 dark:border-zinc-550 bg-slate-100/50 dark:bg-zinc-805/45 shadow-sm',
-      inactive: 'border-slate-100 dark:border-zinc-850 bg-slate-50/30 dark:bg-zinc-900/15 hover:border-slate-205 dark:hover:border-zinc-800'
-    },
-    indigo: {
-      active: 'border-indigo-505 dark:border-indigo-500/80 bg-indigo-50/35 dark:bg-indigo-950/15 shadow-sm',
-      inactive: 'border-indigo-550/20 dark:border-indigo-500/10 bg-indigo-500/[0.02] hover:bg-indigo-500/[0.06] hover:border-indigo-500/40'
-    },
-    emerald: {
-      active: 'border-emerald-500 dark:border-emerald-550 bg-emerald-50/35 dark:bg-emerald-950/15 shadow-sm',
-      inactive: 'border-emerald-550/20 dark:border-emerald-500/10 bg-emerald-500/[0.02] hover:bg-emerald-550/[0.06] hover:border-emerald-500/40'
-    },
-    amber: {
-      active: 'border-amber-500 dark:border-amber-550 bg-amber-50/40 dark:bg-amber-950/15 shadow-sm',
-      inactive: 'border-amber-550/20 dark:border-amber-500/10 bg-amber-500/[0.02] hover:bg-amber-500/[0.06] hover:border-amber-500/40'
-    },
-    rose: {
-      active: 'border-rose-500 dark:border-rose-550 bg-rose-50/35 dark:bg-rose-950/15 shadow-sm',
-      inactive: 'border-rose-550/20 dark:border-rose-500/10 bg-rose-500/[0.02] hover:bg-rose-500/[0.06] hover:border-rose-500/40'
-    },
-    violet: {
-      active: 'border-violet-500 dark:border-violet-550 bg-violet-50/35 dark:bg-violet-950/15 shadow-sm',
-      inactive: 'border-violet-550/20 dark:border-violet-500/10 bg-violet-500/[0.02] hover:bg-violet-500/[0.06] hover:border-violet-500/40'
-    },
-    cyan: {
-      active: 'border-cyan-500 dark:border-cyan-550 bg-cyan-100/15 dark:bg-cyan-950/10 shadow-sm',
-      inactive: 'border-cyan-550/25 dark:border-cyan-500/10 bg-cyan-500/[0.02] hover:bg-cyan-505/[0.06] hover:border-cyan-500/40'
-    }
+export function getHexForColor(col: string): string {
+  const presets: Record<string, string> = {
+    slate: '#64748b',
+    indigo: '#4f46e5',
+    emerald: '#10b981',
+    amber: '#f59e0b',
+    rose: '#f43f5e',
+    violet: '#8b5cf6',
+    cyan: '#06b6d4'
   };
+  const lower = col.trim().toLowerCase();
+  if (presets[lower]) return presets[lower];
+  if (lower.startsWith('#')) return col;
+  if (lower.startsWith('rgb')) return col;
+  return col;
+}
 
-  const preset = colors[colorNameOrHex];
-  if (preset) {
-    return { className: isActive ? preset.active : preset.inactive };
-  } else {
-    // Custom Color Hex mapping dynamically
-    if (isActive) {
-      return {
-        className: 'shadow-sm',
-        style: {
-          borderColor: colorNameOrHex,
-          backgroundColor: colorNameOrHex + '18', // soft alpha background
-        }
-      };
-    } else {
-      return {
-        className: 'hover:opacity-95',
-        style: {
-          borderColor: colorNameOrHex + '30', // soft border
-          backgroundColor: colorNameOrHex + '08', // transparent backdrop
-        }
-      };
+export function hexToRgba(hex: string, alpha: number): string {
+  let cleanHex = hex.replace('#', '').trim();
+  if (cleanHex.startsWith('rgb')) {
+    const match = cleanHex.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+    if (match) {
+      return `rgba(${match[1]}, ${match[2]}, ${match[3]}, ${alpha})`;
     }
+  }
+  if (cleanHex.length === 3) {
+    cleanHex = cleanHex.split('').map(c => c + c).join('');
+  }
+  const r = parseInt(cleanHex.substring(0, 2), 16) || 0;
+  const g = parseInt(cleanHex.substring(2, 4), 16) || 0;
+  const b = parseInt(cleanHex.substring(4, 6), 16) || 0;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+// Aesthetic note card styling helper - Standard Slate/Zinc themed borders & backgrounds to avoid clashes
+const getThemeClasses = (note: Note, isActive: boolean, tagDefinitions: TagDefinition[]): { className: string; style?: React.CSSProperties } => {
+  if (isActive) {
+    return {
+      className: 'border-indigo-650 bg-indigo-50/15 dark:bg-indigo-950/10 shadow-sm ring-1 ring-indigo-500/10'
+    };
+  } else {
+    return {
+      className: 'border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 hover:bg-slate-50/50 dark:hover:bg-zinc-900/80 hover:border-slate-300 dark:hover:border-zinc-700'
+    };
   }
 };
 
@@ -146,29 +133,17 @@ export const getTagColorClass = (colorNameOrHex?: string) => {
   if (!colorNameOrHex) {
     return { className: 'bg-slate-350 dark:bg-zinc-650 ring-2 ring-slate-400/20' };
   }
-  const presets: Record<string, string> = {
-    indigo: 'bg-indigo-500 ring-2 ring-indigo-500/15',
-    emerald: 'bg-emerald-500 ring-2 ring-emerald-500/15',
-    amber: 'bg-amber-500 ring-2 ring-amber-500/15',
-    rose: 'bg-rose-500 ring-2 ring-rose-500/15',
-    violet: 'bg-violet-500 ring-2 ring-violet-500/15',
-    cyan: 'bg-cyan-500 ring-2 ring-cyan-500/15',
-    slate: 'bg-slate-500 ring-2 ring-slate-500/15'
+  const hex = getHexForColor(colorNameOrHex);
+  return {
+    className: '',
+    style: {
+      backgroundColor: hex,
+      boxShadow: `0 0 0 2px ${hexToRgba(hex, 0.15)}`
+    }
   };
-  if (presets[colorNameOrHex]) {
-    return { className: presets[colorNameOrHex] };
-  } else {
-    return {
-      className: '',
-      style: {
-        backgroundColor: colorNameOrHex,
-        boxShadow: `0 0 0 2px ${colorNameOrHex}25`
-      }
-    };
-  }
 };
 
-// Returns style classes or direct border-text styling rules for tag chips in the UI
+// Returns style classes or direct border-text styling rules for tag chips in the UI (7% bg, 15% border)
 export function getTagStyle(tagName: string, tagDefinitions: TagDefinition[]): {
   className: string;
   style?: React.CSSProperties;
@@ -177,31 +152,7 @@ export function getTagStyle(tagName: string, tagDefinitions: TagDefinition[]): {
 } {
   const def = tagDefinitions.find(d => d.name.toLowerCase() === tagName.toLowerCase());
   const col = def ? def.color : 'slate';
-
-  const presets: Record<string, { className: string; hex: string }> = {
-    slate: { className: 'bg-slate-100 dark:bg-zinc-805 text-slate-800 dark:text-zinc-200 border-slate-205 dark:border-zinc-750', hex: '#64748b' },
-    indigo: { className: 'bg-indigo-50/70 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border-indigo-200/20 dark:border-indigo-900/10', hex: '#4f46e5' },
-    emerald: { className: 'bg-emerald-50/70 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border-emerald-200/20 dark:border-emerald-900/10', hex: '#10b981' },
-    amber: { className: 'bg-amber-50/70 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border-amber-200/20 dark:border-amber-900/10', hex: '#f59e0b' },
-    rose: { className: 'bg-rose-50/70 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border-rose-200/20 dark:border-rose-900/10', hex: '#f43f5e' },
-    violet: { className: 'bg-violet-50/70 dark:bg-violet-950/40 text-violet-605 dark:text-violet-400 border-violet-200/20 dark:border-violet-900/10', hex: '#8b5cf6' },
-    cyan: { className: 'bg-cyan-50/70 dark:bg-cyan-950/40 text-cyan-600 dark:text-cyan-400 border-cyan-200/20 dark:border-cyan-900/10', hex: '#06b6d4' }
-  };
-
-  if (presets[col]) {
-    return { className: presets[col].className, colorNameOrHex: col, colorHex: presets[col].hex };
-  } else {
-    return {
-      className: 'border shadow-xxs',
-      style: {
-        backgroundColor: col,
-        color: '#ffffff',
-        borderColor: col
-      },
-      colorNameOrHex: col,
-      colorHex: col
-    };
-  }
+  return getTagStyleForColor(col);
 }
 
 export function getTagStyleForColor(colorNameOrHex: string): {
@@ -211,32 +162,19 @@ export function getTagStyleForColor(colorNameOrHex: string): {
   colorHex: string;
 } {
   const col = colorNameOrHex || 'slate';
-
-  const presets: Record<string, { className: string; hex: string }> = {
-    slate: { className: 'bg-slate-100 dark:bg-zinc-805 text-slate-800 dark:text-zinc-200 border-slate-205 dark:border-zinc-750', hex: '#64748b' },
-    indigo: { className: 'bg-indigo-50/70 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border-indigo-200/20 dark:border-indigo-900/10', hex: '#4f46e5' },
-    emerald: { className: 'bg-emerald-50/70 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border-emerald-200/20 dark:border-emerald-900/10', hex: '#10b981' },
-    amber: { className: 'bg-amber-50/70 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border-amber-200/20 dark:border-amber-900/10', hex: '#f59e0b' },
-    rose: { className: 'bg-rose-50/70 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border-rose-200/20 dark:border-rose-900/10', hex: '#f43f5e' },
-    violet: { className: 'bg-violet-50/70 dark:bg-violet-950/40 text-violet-605 dark:text-violet-400 border-violet-200/20 dark:border-violet-900/10', hex: '#8b5cf6' },
-    cyan: { className: 'bg-cyan-50/70 dark:bg-cyan-950/40 text-cyan-600 dark:text-cyan-400 border-cyan-200/20 dark:border-cyan-900/10', hex: '#06b6d4' }
+  const hex = getHexForColor(col);
+  return {
+    className: '',
+    style: {
+      backgroundColor: hexToRgba(hex, 0.07),
+      borderColor: hexToRgba(hex, 0.15),
+      color: hex,
+      borderWidth: '1px',
+      borderStyle: 'solid'
+    },
+    colorNameOrHex: col,
+    colorHex: hex
   };
-
-  if (presets[col]) {
-    return { className: presets[col].className, colorNameOrHex: col, colorHex: presets[col].hex };
-  } else {
-    // Ensure hex format safety if there is a raw hex color
-    return {
-      className: 'border shadow-xxs',
-      style: {
-        backgroundColor: col,
-        color: '#ffffff',
-        borderColor: col
-      },
-      colorNameOrHex: col,
-      colorHex: col
-    };
-  }
 }
 
 const getFontClass = (family?: string) => {
@@ -737,8 +675,9 @@ export default function Sidebar({
                 const noteSizeClass = getSizeClass(note.fontSize);
                 const cardTheme = getThemeClasses(note, isActive, tagDefinitions);
                 const activeColor = getActiveNoteColor(note, tagDefinitions);
-                const colorIndicator = getTagColorClass(activeColor);
+                const activeColorHex = getTagStyleForColor(activeColor).colorHex;
                 const isCompact = prefs.noteListLayout === 'compact';
+                const hasTagOrCustomColor = (note.tags && note.tags.length > 0) || !!note.color;
 
                 return (
                   <button
@@ -754,6 +693,12 @@ export default function Sidebar({
                     } ${cardTheme.className || ''}`}
                     style={cardTheme.style}
                   >
+                    {hasTagOrCustomColor && (
+                      <div 
+                        className="absolute left-0 top-0 bottom-0 w-[4px] h-full shrink-0 z-10" 
+                        style={{ backgroundColor: activeColorHex }}
+                      />
+                    )}
                     {!isCompact ? (
                       // NORMAL MODE: Large centered bento-style card
                       <>

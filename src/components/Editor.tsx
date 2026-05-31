@@ -2261,8 +2261,7 @@ export default function Editor({
                   ) : (
                     (note.tags || []).map(t => {
                       const isPrimary = note.primaryTag ? note.primaryTag === t : note.tags?.[0] === t;
-                      const activeNoteColor = getActiveNoteColor(note, tagDefinitions);
-                      const colStyle = getTagStyleForColor(activeNoteColor);
+                      const colStyle = getTagStyle(t, tagDefinitions);
                       return (
                         <div 
                           key={t}
@@ -2316,32 +2315,18 @@ export default function Editor({
                     const activeStyle = getTagStyleForColor(activeNoteColor);
                     
                     let itemStyle: React.CSSProperties = {};
-                    let buttonClassNames = "px-2 py-0.5 text-[9px] font-extrabold rounded-md transition-all cursor-pointer border";
+                    const buttonClassNames = "px-2 py-0.5 text-[9px] font-extrabold rounded-md transition-all cursor-pointer border";
 
                     if (isAttached) {
-                      if (tStyle.style) {
-                        itemStyle = {
-                          backgroundColor: tStyle.style.backgroundColor,
-                          color: '#ffffff',
-                          borderColor: tStyle.style.borderColor || tStyle.style.backgroundColor
-                        };
-                      } else {
-                        const presetColors: Record<string, string> = {
-                          slate: 'bg-slate-600 text-white border-slate-600 shadow-xxs',
-                          indigo: 'bg-indigo-600 text-white border-indigo-600 shadow-xxs',
-                          emerald: 'bg-emerald-600 text-white border-emerald-600 shadow-xxs',
-                          amber: 'bg-amber-600 text-white border-amber-600 shadow-xxs',
-                          rose: 'bg-rose-600 text-white border-rose-600 shadow-xxs',
-                          violet: 'bg-violet-600 text-white border-violet-600 shadow-xxs',
-                          cyan: 'bg-cyan-600 text-white border-cyan-600 shadow-xxs'
-                        };
-                        buttonClassNames += ` ${presetColors[tStyle.colorNameOrHex] || 'bg-slate-600 text-white border-slate-600 shadow-xxs'}`;
-                      }
+                      itemStyle = {
+                        backgroundColor: tStyle.colorHex,
+                        color: '#ffffff',
+                        borderColor: tStyle.colorHex,
+                        borderWidth: '1px',
+                        borderStyle: 'solid'
+                      };
                     } else {
-                      buttonClassNames += ` ${tStyle.className}`;
-                      if (tStyle.style) {
-                        itemStyle = { ...tStyle.style };
-                      }
+                      itemStyle = tStyle.style || {};
                     }
 
                     return (

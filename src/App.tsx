@@ -86,7 +86,7 @@ export default function App() {
 
   // Save tags locally if they change
   useEffect(() => {
-    if (tagDefinitions.length > 0) {
+    if (isLoadedRef.current) {
       saveLocalTags(tagDefinitions);
     }
   }, [tagDefinitions]);
@@ -538,6 +538,35 @@ export default function App() {
     }
   };
 
+  // Save or update tag definition
+  const handleSaveTag = (tag: TagDefinition) => {
+    setTagDefinitions(prev => {
+      const exists = prev.some(t => t.name.toLowerCase() === tag.name.toLowerCase());
+      if (exists) {
+        return prev.map(t => t.name.toLowerCase() === tag.name.toLowerCase() ? tag : t);
+      } else {
+        return [...prev, tag];
+      }
+    });
+  };
+
+  // Delete tag definition globally and remove from notes
+  const handleDeleteTag = async (name: string) => {
+    setTagDefinitions(prev => prev.filter(t => t.name.toLowerCase() !== name.toLowerCase()));
+
+    const updatedNotes = decryptedNotes.map(note => {
+      if (note.tags && note.tags.includes(name)) {
+        const newTags = note.tags.filter(t => t !== name);
+        const primaryTag = note.primaryTag === name ? (newTags[0] || '') : note.primaryTag;
+        const updated = { ...note, tags: newTags, primaryTag, updatedAt: Date.now() };
+        saveAndSyncNote(updated);
+        return updated;
+      }
+      return note;
+    });
+    setDecryptedNotes(updatedNotes);
+  };
+
   // Import Backup logic
   const handleImportBackup = async (backup: { notes: Note[]; folders: Folder[] }) => {
     // 1. Wipe current offline cache and merge
@@ -842,6 +871,9 @@ export default function App() {
           onClearAllData={handleClearAllData}
           onTriggerEncryptionSetup={() => setShowPassphraseModal('setup')}
           onDisableEncryption={handleDisableEncryption}
+          tagDefinitions={tagDefinitions}
+          onSaveTag={handleSaveTag}
+          onDeleteTag={handleDeleteTag}
           onClose={() => setShowSettings(false)}
         />
       )}
