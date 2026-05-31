@@ -6,16 +6,17 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Cloud, CloudOff, RefreshCw, LogIn, LogOut, ShieldAlert, AlertTriangle, ExternalLink, X } from 'lucide-react';
-import { isFirebaseEnabled, isInIframe, loginWithGoogle, logoutUser } from '../lib/firebase';
+import { CustomUser, logoutUser, authenticateWithGoogle } from '../lib/api';
 import { SyncStatus } from '../types';
-import { User } from 'firebase/auth';
 
 interface AuthBarProps {
-  user: User | null;
+  user: CustomUser | null;
   syncStatus: SyncStatus;
-  onUserChanged: (user: User | null) => void;
+  onUserChanged: (user: CustomUser | null) => void;
   onTriggerSync: () => void;
 }
+
+const isAuthEnabled = true;
 
 export default function AuthBar({
   user,
@@ -28,32 +29,52 @@ export default function AuthBar({
   const handleLogin = async () => {
     setAuthError(null);
 
-    // In an iframe (e.g. AI Studio preview), both signInWithPopup and signInWithRedirect
-    // are blocked by the browser's cross-site tracking protection.
-    // Open the app in a new tab instead — Firebase auth state persists via
-    // IndexedDB/localStorage and onAuthStateChanged will fire here automatically.
-    if (isInIframe()) {
-      window.open(window.location.href, '_blank');
+    if (typeof (window as any).google === 'undefined') {
+      setAuthError({
+        code: 'auth/gsi-not-loaded',
+        message: 'Google Sign-In is still loading or blocked by your browser. Please refresh and try again.'
+      });
       return;
     }
 
     try {
-      const result = await loginWithGoogle();
-      if (result) {
-        onUserChanged(result.user);
-      }
-      // null result = redirect flow initiated, page will navigate to Google
+      const client = (window as any).google.accounts.oauth2.initCodeClient({
+        client_id: '694650125615-5qmlq66g9q6l97m8q3u1b8j9p6t18p1p.apps.googleusercontent.com',
+        scope: 'openid email profile',
+        ux_mode: 'popup',
+        callback: async (response: any) => {
+          if (response.code) {
+            try {
+              const authResult = await authenticateWithGoogle(response.code);
+              onUserChanged(authResult.user);
+            } catch (err: any) {
+              console.error('Backend auth failed:', err);
+              setAuthError({
+                code: 'auth/backend-failure',
+                message: 'Failed to verify Google login with SQLite server.'
+              });
+            }
+          } else {
+            setAuthError({
+              code: 'auth/no-code',
+              message: 'Google Sign-In failed to return an authorization code.'
+            });
+          }
+        }
+      });
+      client.requestCode();
     } catch (e: any) {
       console.error("Auth failed", e);
-      const code = e?.code || 'auth/unknown';
-      const message = e?.message || 'Authorization was cancelled or restricted.';
-      setAuthError({ code, message });
+      setAuthError({
+        code: 'auth/init-failed',
+        message: e?.message || 'Failed to initialize Google Sign-In popup.'
+      });
     }
   };
 
   const handleLogout = async () => {
     try {
-      await logoutUser();
+      logoutUser();
       onUserChanged(null);
     } catch (e) {
       console.error("Logout failed", e);
@@ -98,7 +119,7 @@ export default function AuthBar({
 
       {/* Cloud User Profile */}
       <div className="flex flex-row md:flex-col items-center gap-3 justify-center w-full">
-        {!isFirebaseEnabled ? (
+        {!isAuthEnabled ? (
           <div className="flex items-center justify-center w-9 h-9 bg-slate-100 dark:bg-zinc-900 rounded-[8px] border border-slate-200 dark:border-zinc-800 shrink-0" title="Offline Mode">
             <CloudOff size={16} className="text-slate-400 dark:text-zinc-500" />
           </div>
@@ -128,7 +149,7 @@ export default function AuthBar({
           <button
             onClick={handleLogin}
             className="flex items-center justify-center w-9 h-9 bg-indigo-600 hover:bg-indigo-500 text-white rounded-[8px] shadow-md shadow-indigo-500/15 cursor-pointer active:scale-95 transition-all duration-200 shrink-0"
-            title={isInIframe() ? "Sign In (opens new tab — sign in, then return here)" : "Sign In"}
+            title="Sign In with Google"
           >
             <LogIn size={16} />
           </button>

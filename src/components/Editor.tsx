@@ -22,6 +22,7 @@ import MultitonePromptModal from './MultitonePromptModal';
 import LibreTranslateModal from './LibreTranslateModal';
 import GoogleWorkspacePicker from './GoogleWorkspacePicker';
 import { htmlToMarkdown } from '../lib/converter';
+import { uploadMediaToR2 } from '../lib/api';
 import { getTagStyle, getActiveNoteColor, getTagColorClass, getTagStyleForColor } from './Sidebar';
 import * as HeroOutlineIcons from '@heroicons/react/24/outline';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
@@ -521,10 +522,15 @@ export default function Editor({
           return;
         }
 
-        const base64 = await blobToBase64(audioBlob);
-        
-        if (audioBlob.size > 700 * 1024) {
-          showShortcutsPulse("Audio is large. It will save locally but may fail to sync to Cloud.");
+        let mediaUrl = '';
+        try {
+          showShortcutsPulse("Uploading voice note to Cloudflare R2...");
+          mediaUrl = await uploadMediaToR2(audioBlob, "voice-note.webm");
+          showShortcutsPulse("Voice note uploaded successfully!");
+        } catch (err) {
+          console.warn("R2 upload failed, falling back to local base64:", err);
+          mediaUrl = await blobToBase64(audioBlob);
+          showShortcutsPulse("Saved locally. (Cloud upload failed)");
         }
         
         // Insert audio player visual or markdown
@@ -542,11 +548,11 @@ export default function Editor({
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                 </button>
               </div>
-              <audio controls class="w-full h-10 filter dark:invert contrast-75" src="${base64}"></audio>
+              <audio controls class="w-full h-10 filter dark:invert contrast-75" src="${mediaUrl}"></audio>
             </div><p><br></p>`;
           insertHTMLAtCursor(audioHTML);
         } else {
-          const audioMD = `\n<audio controls src="${base64}"></audio>\n`;
+          const audioMD = `\n<audio controls src="${mediaUrl}"></audio>\n`;
           insertTextAtCursor(audioMD);
         }
         
@@ -641,13 +647,7 @@ export default function Editor({
         return;
       }
 
-      if (file.size > 700 * 1024) {
-        showShortcutsPulse("Large video detected. It will save locally but may exceed Cloud sync limits.");
-      }
-
-      const reader = new FileReader();
-      reader.onload = async (evt) => {
-        const base64 = evt.target?.result as string;
+      const insertVideoHTML = (urlSrc: string) => {
         const videoHTML = `<div class="p-3 my-4 bg-slate-50 dark:bg-zinc-800/20 rounded-2xl border border-slate-200 dark:border-zinc-700/50 flex flex-col gap-2 video-attachment group max-w-sm">
             <div class="flex items-center justify-between gap-3 px-1">
               <div class="flex items-center gap-2.5">
@@ -664,13 +664,29 @@ export default function Editor({
               </button>
             </div>
             <div class="relative rounded-xl overflow-hidden aspect-video bg-black/5 flex items-center justify-center">
-               <video controls class="w-full h-full object-cover shadow-xs" src="${base64}"></video>
+               <video controls class="w-full h-full object-cover shadow-xs" src="${urlSrc}"></video>
             </div>
           </div>`;
         insertHTMLAtCursor(videoHTML);
         showShortcutsPulse(`Video "${file.name}" attached successfully.`);
       };
-      reader.readAsDataURL(file);
+
+      showShortcutsPulse("Uploading video to Cloudflare R2...");
+      uploadMediaToR2(file, file.name)
+        .then((publicUrl) => {
+          showShortcutsPulse("Video uploaded successfully!");
+          insertVideoHTML(publicUrl);
+        })
+        .catch(async (err) => {
+          console.warn("R2 upload failed, falling back to local base64:", err);
+          const reader = new FileReader();
+          reader.onload = async (evt) => {
+            const base64 = evt.target?.result as string;
+            insertVideoHTML(base64);
+            showShortcutsPulse("Saved locally. (Cloud upload failed)");
+          };
+          reader.readAsDataURL(file);
+        });
     }
   };
 

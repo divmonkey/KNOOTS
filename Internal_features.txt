@@ -1,0 +1,39 @@
+- Notes — create, edit, delete, rename
+- Daily Note — one-click note pre-titled with today's date
+- Folders — create, rename, delete, move notes between folders
+- Rich Text Editor — WYSIWYG editing mode
+- Markdown Editor — split-pane raw markdown + rendered preview
+- Note Icons — custom SVG/emoji icon per note
+- Note Colors — color accent per note
+- Folder Icons — custom icon per folder
+- Folder Colors — color accent per folder
+- Tags/Categories — multi-tag support with color accents per tag
+- Primary Tag — one tag designated as the main accent color
+- Search — full-text search across all notes
+- E2E Encryption (AES-GCM) — client-side encryption of note titles and content
+- Passphrase Vault — master passphrase to lock/unlock all encrypted notes
+- Biometric Authentication — WebAuthn (Face ID / Touch ID) to unlock vault
+- Google Sign-In — Google Identity Services (OAuth 2.0) authentication
+- Cloud Sync — Express SQLite database sync with last-write-wins merge & Cloudflare R2 media storage
+- Offline Mode — full local-first operation via IndexedDB
+- Optimistic UI — instant UI updates, background sync
+- Sync Status Indicator — syncing / synced / offline / error states
+- Manual Sync Trigger — force a cloud sync check
+- Design Styles — 30+ UI themes (glassmorphism, cyberpunk, brutalist, etc.)
+- Light / Dark Mode — theme toggle
+- Typography Settings — font family (5 options), font size, line height
+- Syntax Themes — 6 code highlighting themes (Dracula, Monokai, etc.)
+- Editor Mode Switcher — toggle between Rich Text and Markdown
+- Pane Naming Options — rename editor panes (Raw/Formatted, Source/Preview, etc.)
+- Note List Layout — normal or compact view
+- Favorite Design Style — pin a style as default on load
+- Google Workspace Picker — embed Google Docs / Sheets into notes
+- Translation — translate note content (LibreTranslate modal)
+- AI Composer (Gemini) — AI-assisted note writing via Gemini API
+- Code Highlighting — syntax-highlighted code blocks in rendered view
+- Zip Backup Export — download all notes as .zip with individual .md files + index
+- Backup Import — re-import a backup ZIP to restore notes/folders
+- Data Wipe — full local data clear / factory reset
+- Disable Encryption — decrypt all notes and turn off vault
+- Mobile Responsive — slide-in drawer sidebar, bottom nav bar on mobile
+- Slash Templates — pre-filled note templates via slash commands

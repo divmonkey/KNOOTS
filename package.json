@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port=8080 --host=0.0.0.0",
+    "server": "tsx server/server.ts",
+    "dev:all": "concurrently \"npm run dev\" \"npm run server\"",
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
@@ -12,15 +14,20 @@
     "screenshots": "playwright test"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1057.0",
+    "@aws-sdk/s3-request-presigner": "^3.1057.0",
     "@google/genai": "^2.4.0",
     "@heroicons/react": "^2.2.0",
     "@tailwindcss/vite": "^4.1.14",
     "@vitejs/plugin-react": "^5.0.4",
+    "concurrently": "^10.0.0",
     "dotenv": "^17.2.3",
     "express": "^4.21.2",
     "file-saver": "^2.0.5",
     "firebase": "^12.14.0",
+    "google-auth-library": "^10.6.2",
     "idb-keyval": "^6.2.4",
+    "jsonwebtoken": "^9.0.3",
     "jszip": "^3.10.1",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
@@ -28,6 +35,8 @@
     "react-dom": "^19.0.1",
     "react-markdown": "^10.1.0",
     "rehype-raw": "^7.0.0",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^6.0.1",
     "vite": "^6.2.3"
   },
   "devDependencies": {

@@ -7,6 +7,7 @@ import React from 'react';
 import { SyntaxTheme } from '../types';
 
 interface CodeHighlighterProps {
+  key?: React.Key;
   code: string;
   language?: string;
   theme: SyntaxTheme;

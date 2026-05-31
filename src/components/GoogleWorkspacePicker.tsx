@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, FileText, Table2, HardDrive, RefreshCw, Search } from 'lucide-react';
-import { getAccessToken, loginWithGoogle } from '../lib/firebase';
+import { getAccessToken, loginWithGoogle } from '../lib/api';
 
 interface GoogleWorkspacePickerProps {
   onClose: () => void;

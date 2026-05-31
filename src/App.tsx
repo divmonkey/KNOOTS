@@ -23,21 +23,15 @@ import {
   hashPassphrase
 } from './lib/crypto';
 import {
-  isFirebaseEnabled,
-  auth,
-  db,
-  doc,
-  setDoc,
-  deleteDoc,
-  collection,
-  onSnapshot,
-  Timestamp,
-  onAuthStateChanged,
-  OperationType,
-  handleFirestoreError,
-  handleRedirectResult
-} from './lib/firebase';
-import { User } from 'firebase/auth';
+  CustomUser,
+  getCachedUser,
+  logoutUser,
+  fetchSyncState,
+  saveNoteOnServer,
+  deleteNoteOnServer,
+  saveFolderOnServer,
+  deleteFolderOnServer
+} from './lib/api';
 
 // Components
 import Sidebar from './components/Sidebar';
@@ -59,7 +53,7 @@ export default function App() {
     syntaxTheme: 'dracula',
     designStyle: 'futuristic'
   }));
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<CustomUser | null>(() => getCachedUser());
   const isLoadedRef = useRef(false);
 
   // Decrypted states in active React memory for typing and searching
@@ -191,251 +185,151 @@ export default function App() {
     loadPlaintextData();
   }, [passphrase, prefs.encryptionEnabled]);
 
-  // Handle Firebase auth listening and background snapshot synchronization
+  // Handle Backend auth state sync status updates
   useEffect(() => {
-    if (!isFirebaseEnabled || !auth) {
-      setSyncStatus({ state: 'offline', message: 'Offline mode is active' });
-      return;
+    if (user) {
+      setSyncStatus({ state: 'synced', message: 'Connected to SQLite backend.' });
+    } else {
+      setSyncStatus({ state: 'offline', message: 'Offline mode is active. Log in to sync.' });
     }
+  }, [user]);
 
-    // Capture access token if returning from a redirect sign-in flow
-    handleRedirectResult().then(result => {
-      if (result) setUser(result.user);
-    });
+  const triggerSync = async () => {
+    if (!user || isSyncingRef.current) return;
+    isSyncingRef.current = true;
+    setSyncStatus({ state: 'syncing', message: 'Syncing with SQLite backend...' });
 
-    const unsubAuth = onAuthStateChanged(auth, (firebaseUser: User | null) => {
-      setUser(firebaseUser);
-      if (firebaseUser) {
-        setSyncStatus({ state: 'syncing', message: 'Connecting to Cloud sync...' });
-      } else {
-        setSyncStatus({ state: 'offline', message: 'Logged out. Saving in local cache.' });
-      }
-    });
+    try {
+      // 1. Fetch remote folders and notes from SQLite server
+      const remote = await fetchSyncState();
 
-    return () => unsubAuth();
-  }, []);
+      // --- Folders Sync Merge ---
+      const localFolders = await loadLocalFolders();
+      const folderIdsMap = new Map<string, Folder>();
+      const foldersToPush: Folder[] = [];
 
-  // Firebase Real-time syncing with last-write-wins merging
-  useEffect(() => {
-    if (!user || !isFirebaseEnabled || !db) return;
+      const allFolderIds = new Set(
+        [...localFolders.map(f => f.id), ...remote.folders.map(f => f.id)]
+          .filter(id => !deletedFolderIdsRef.current.has(id))
+      );
 
-    setSyncStatus({ state: 'syncing', message: 'Pulling directories...' });
+      for (const id of allFolderIds) {
+        const localF = localFolders.find(f => f.id === id);
+        const remoteF = remote.folders.find(f => f.id === id);
 
-    // Sync folders snapshot
-    const foldersRefPath = `users/${user.uid}/folders`;
-    const unsubFolders = onSnapshot(collection(db, 'users', user.uid, 'folders'), async (snapshot) => {
-      if (isSyncingRef.current) return;
-      isSyncingRef.current = true;
-
-      try {
-        const remoteFolders: Folder[] = [];
-        snapshot.forEach((docSnap) => {
-          const data = docSnap.data();
-          remoteFolders.push({
-            id: data.id,
-            name: data.name,
-            ownerId: data.ownerId,
-            isEncrypted: data.isEncrypted,
-            createdAt: (data.createdAt as Timestamp).toMillis(),
-            updatedAt: (data.updatedAt as Timestamp).toMillis(),
-            icon: data.icon || undefined,
-            color: data.color || undefined
-          });
-        });
-
-        const localFolders = await loadLocalFolders();
-        // Merge lists
-        const folderIdsMap = new Map<string, Folder>();
-        const toPush: Folder[] = [];
-
-        // Aggregate All known folder IDs (ignoring any that are deleted)
-        const allFolderIds = new Set(
-          [...localFolders.map(f => f.id), ...remoteFolders.map(f => f.id)]
-            .filter(id => !deletedFolderIdsRef.current.has(id))
-        );
-        
-        for (const id of allFolderIds) {
-          const localF = localFolders.find(f => f.id === id);
-          const remoteF = remoteFolders.find(f => f.id === id);
-
-          if (localF && remoteF) {
-            if (localF.updatedAt > remoteF.updatedAt) {
-              folderIdsMap.set(id, localF);
-              toPush.push(localF);
-            } else {
-              folderIdsMap.set(id, remoteF);
-            }
-          } else if (localF) {
+        if (localF && remoteF) {
+          if (localF.updatedAt > remoteF.updatedAt) {
             folderIdsMap.set(id, localF);
-            toPush.push(localF);
-          } else if (remoteF) {
+            foldersToPush.push(localF);
+          } else {
             folderIdsMap.set(id, remoteF);
           }
+        } else if (localF) {
+          folderIdsMap.set(id, localF);
+          foldersToPush.push(localF);
+        } else if (remoteF) {
+          folderIdsMap.set(id, remoteF);
         }
-
-        const mergedFolders = Array.from(folderIdsMap.values());
-        saveLocalFolders(mergedFolders);
-
-        // Decrypt the newly merged folders immediately
-        const decFolders: Folder[] = [];
-        for (const f of mergedFolders) {
-          if (f.isEncrypted && prefs.encryptionEnabled && passphrase && prefs.encryptionKeySalt) {
-            try {
-              const name = await decryptText(f.name, passphrase, prefs.encryptionKeySalt);
-              decFolders.push({ ...f, name });
-            } catch {
-              decFolders.push({ ...f, name: '[Locked Folder]' });
-            }
-          } else {
-            decFolders.push(f);
-          }
-        }
-        setDecryptedFolders(decFolders);
-
-        // Push newer local files to server
-        for (const f of toPush) {
-          await setDoc(doc(db, 'users', user.uid, 'folders', f.id), {
-            id: f.id,
-            name: f.name,
-            ownerId: user.uid,
-            isEncrypted: f.isEncrypted,
-            createdAt: Timestamp.fromMillis(f.createdAt),
-            updatedAt: Timestamp.fromMillis(f.updatedAt),
-            icon: f.icon || '',
-            color: f.color || ''
-          });
-        }
-      } catch (err) {
-        console.error("Folder sync failed", err);
-      } finally {
-        isSyncingRef.current = false;
       }
-    }, (error) => {
-      handleFirestoreError(error, OperationType.GET, foldersRefPath);
-    });
 
-    // Sync notes snapshot
-    const notesRefPath = `users/${user.uid}/notes`;
-    const unsubNotes = onSnapshot(collection(db, 'users', user.uid, 'notes'), async (snapshot) => {
-      if (isSyncingRef.current) return;
-      isSyncingRef.current = true;
+      const mergedFolders = Array.from(folderIdsMap.values());
+      await saveLocalFolders(mergedFolders);
 
-      try {
-        const remoteNotes: Note[] = [];
-        snapshot.forEach((docSnap) => {
-          const data = docSnap.data();
-          remoteNotes.push({
-            id: data.id,
-            title: data.title,
-            content: data.content,
-            folderId: data.folderId,
-            ownerId: data.ownerId,
-            isEncrypted: data.isEncrypted,
-            createdAt: (data.createdAt as Timestamp).toMillis(),
-            updatedAt: (data.updatedAt as Timestamp).toMillis(),
-            color: data.color || undefined,
-            fontSize: data.fontSize || undefined,
-            fontFamily: data.fontFamily || undefined,
-            icon: data.icon || undefined,
-            tags: data.tags || undefined,
-            primaryTag: data.primaryTag || undefined
-          });
-        });
+      // Decrypt folders
+      const decFolders: Folder[] = [];
+      for (const f of mergedFolders) {
+        if (f.isEncrypted && prefs.encryptionEnabled && passphrase && prefs.encryptionKeySalt) {
+          try {
+            const name = await decryptText(f.name, passphrase, prefs.encryptionKeySalt);
+            decFolders.push({ ...f, name });
+          } catch {
+            decFolders.push({ ...f, name: '[Locked Folder]' });
+          }
+        } else {
+          decFolders.push(f);
+        }
+      }
+      setDecryptedFolders(decFolders);
 
-        const localNotes = await loadLocalNotes();
-        const noteIdsMap = new Map<string, Note>();
-        const toPush: Note[] = [];
+      // Push folders to SQLite backend
+      for (const f of foldersToPush) {
+        await saveFolderOnServer(f).catch(err => console.error("Sync push folder failed", err));
+      }
 
-        const allNoteIds = new Set(
-          [...localNotes.map(n => n.id), ...remoteNotes.map(n => n.id)]
-            .filter(id => !deletedNoteIdsRef.current.has(id))
-        );
+      // --- Notes Sync Merge ---
+      const localNotes = await loadLocalNotes();
+      const noteIdsMap = new Map<string, Note>();
+      const notesToPush: Note[] = [];
 
-        for (const id of allNoteIds) {
-          const localN = localNotes.find(n => n.id === id);
-          const remoteN = remoteNotes.find(n => n.id === id);
+      const allNoteIds = new Set(
+        [...localNotes.map(n => n.id), ...remote.notes.map(n => n.id)]
+          .filter(id => !deletedNoteIdsRef.current.has(id))
+      );
 
-          if (localN && remoteN) {
-            if (localN.updatedAt > remoteN.updatedAt) {
-              noteIdsMap.set(id, localN);
-              toPush.push(localN);
-            } else {
-              noteIdsMap.set(id, remoteN);
-            }
-          } else if (localN) {
+      for (const id of allNoteIds) {
+        const localN = localNotes.find(n => n.id === id);
+        const remoteN = remote.notes.find(n => n.id === id);
+
+        if (localN && remoteN) {
+          if (localN.updatedAt > remoteN.updatedAt) {
             noteIdsMap.set(id, localN);
-            toPush.push(localN);
-          } else if (remoteN) {
+            notesToPush.push(localN);
+          } else {
             noteIdsMap.set(id, remoteN);
           }
+        } else if (localN) {
+          noteIdsMap.set(id, localN);
+          notesToPush.push(localN);
+        } else if (remoteN) {
+          noteIdsMap.set(id, remoteN);
         }
-
-        const mergedNotes = Array.from(noteIdsMap.values());
-        saveLocalNotes(mergedNotes);
-
-        // Decrypt merged notes
-        const decNotes: Note[] = [];
-        for (const n of mergedNotes) {
-          if (n.isEncrypted && prefs.encryptionEnabled && passphrase && prefs.encryptionKeySalt) {
-            try {
-              const title = await decryptText(n.title, passphrase, prefs.encryptionKeySalt);
-              const content = await decryptText(n.content, passphrase, prefs.encryptionKeySalt);
-              decNotes.push({ ...n, title, content });
-            } catch {
-              decNotes.push({
-                ...n,
-                title: '[Locked Note]',
-                content: 'Vault is currently secured. Enter password to decrypt.'
-              });
-            }
-          } else {
-            decNotes.push(n);
-          }
-        }
-        setDecryptedNotes(decNotes);
-
-        // Push modifications
-        for (const n of toPush) {
-          try {
-            await setDoc(doc(db, 'users', user.uid, 'notes', n.id), {
-              id: n.id,
-              title: n.title,
-              content: n.content,
-              folderId: n.folderId,
-              ownerId: user.uid,
-              isEncrypted: n.isEncrypted,
-              createdAt: Timestamp.fromMillis(n.createdAt),
-              updatedAt: Timestamp.fromMillis(n.updatedAt),
-              color: n.color || '',
-              fontSize: n.fontSize || '',
-              fontFamily: n.fontFamily || '',
-              icon: n.icon || '',
-              tags: n.tags || [],
-              primaryTag: n.primaryTag || ''
-            });
-          } catch (err: any) {
-             console.error("Note push failed in sync loop", err);
-             if (err.message && err.message.includes('exceeds the maximum allowed size')) {
-               setSyncStatus({ state: 'error', message: 'One or more notes are too large to sync.' });
-             }
-          }
-        }
-
-        setSyncStatus({ state: 'synced', lastSyncedAt: Date.now() });
-      } catch (err) {
-        console.error("Notes sync failed", err);
-        setSyncStatus({ state: 'error', message: 'Synchronization stalled' });
-      } finally {
-        isSyncingRef.current = false;
       }
-    }, (error) => {
-      handleFirestoreError(error, OperationType.GET, notesRefPath);
-    });
 
-    return () => {
-      unsubFolders();
-      unsubNotes();
-    };
+      const mergedNotes = Array.from(noteIdsMap.values());
+      await saveLocalNotes(mergedNotes);
+
+      // Decrypt notes
+      const decNotes: Note[] = [];
+      for (const n of mergedNotes) {
+        if (n.isEncrypted && prefs.encryptionEnabled && passphrase && prefs.encryptionKeySalt) {
+          try {
+            const title = await decryptText(n.title, passphrase, prefs.encryptionKeySalt);
+            const content = await decryptText(n.content, passphrase, prefs.encryptionKeySalt);
+            decNotes.push({ ...n, title, content });
+          } catch {
+            decNotes.push({
+              ...n,
+              title: '[Locked Note]',
+              content: 'Vault is currently secured. Enter password to decrypt.'
+            });
+          }
+        } else {
+          decNotes.push(n);
+        }
+      }
+      setDecryptedNotes(decNotes);
+
+      // Push notes to SQLite backend
+      for (const n of notesToPush) {
+        await saveNoteOnServer(n).catch(err => console.error("Sync push note failed", err));
+      }
+
+      setSyncStatus({ state: 'synced', lastSyncedAt: Date.now(), message: 'Cloud synchronization complete!' });
+    } catch (err) {
+      console.error('Synchronization failed:', err);
+      setSyncStatus({ state: 'error', message: 'Synchronization failed or offline' });
+    } finally {
+      isSyncingRef.current = false;
+    }
+  };
+
+  // Trigger sync on mount / when user changes, and run a periodic poll interval
+  useEffect(() => {
+    if (user) {
+      triggerSync();
+      const interval = setInterval(triggerSync, 30000);
+      return () => clearInterval(interval);
+    }
   }, [user, passphrase, prefs.encryptionEnabled]);
 
   // Handle local state updates (saves encrypted versions both locally and targets Cloud)
@@ -463,40 +357,26 @@ export default function App() {
     }
     await saveLocalNotes(updatedCache);
 
-    // 3. Sync immediately to Cloud if online
-    if (user && isFirebaseEnabled && db) {
-      try {
-        await setDoc(doc(db, 'users', user.uid, 'notes', note.id), {
-          id: encNote.id,
-          title: encNote.title,
-          content: encNote.content,
-          folderId: encNote.folderId,
-          ownerId: user.uid,
-          isEncrypted: encNote.isEncrypted,
-          createdAt: Timestamp.fromMillis(encNote.createdAt),
-          updatedAt: Timestamp.fromMillis(encNote.updatedAt),
-          color: encNote.color || '',
-          fontSize: encNote.fontSize || '',
-          fontFamily: encNote.fontFamily || '',
-          icon: encNote.icon || '',
-          tags: encNote.tags || [],
-          primaryTag: encNote.primaryTag || ''
+    // 3. Sync immediately to Cloud if online (asynchronous/background to avoid blocking UI save status)
+    if (user) {
+      saveNoteOnServer(encNote).catch(err => {
+        console.error("Background sync note failed:", err);
+        setSyncStatus({ 
+          state: 'error', 
+          message: 'Cloud sync failed for this update.' 
         });
-      } catch (error: any) {
-        console.error("Background sync note failed:", error);
-        if (error.message && error.message.includes('exceeds the maximum allowed size')) {
-          setSyncStatus({ 
-            state: 'error', 
-            message: 'Note too large. Attachments may be exceeding Cloud limits.' 
-          });
-        }
-      }
+      });
     }
   };
 
   const saveAndSyncFolder = async (folder: Folder) => {
     // UI state
-    setDecryptedFolders(prev => [...prev, folder]);
+    setDecryptedFolders(prev => {
+      if (prev.some(f => f.id === folder.id)) {
+        return prev.map(f => f.id === folder.id ? folder : f);
+      }
+      return [...prev, folder];
+    });
 
     let encFolder = { ...folder };
     if (folder.isEncrypted && prefs.encryptionEnabled && passphrase && prefs.encryptionKeySalt) {
@@ -510,23 +390,17 @@ export default function App() {
 
     // Local Disk
     const cachedFolders = await loadLocalFolders();
-    cachedFolders.push(encFolder);
-    await saveLocalFolders(cachedFolders);
+    const updatedCache = cachedFolders.map(f => f.id === folder.id ? encFolder : f);
+    if (!updatedCache.some(f => f.id === folder.id)) {
+      updatedCache.push(encFolder);
+    }
+    await saveLocalFolders(updatedCache);
 
     // Cloud Database
-    if (user && isFirebaseEnabled && db) {
-      try {
-        await setDoc(doc(db, 'users', user.uid, 'folders', folder.id), {
-          id: encFolder.id,
-          name: encFolder.name,
-          ownerId: user.uid,
-          isEncrypted: encFolder.isEncrypted,
-          createdAt: Timestamp.fromMillis(encFolder.createdAt),
-          updatedAt: Timestamp.fromMillis(encFolder.updatedAt)
-        });
-      } catch (error) {
+    if (user) {
+      saveFolderOnServer(encFolder).catch(error => {
         console.error("Sync folder addition failed:", error);
-      }
+      });
     }
   };
 
@@ -606,21 +480,10 @@ export default function App() {
     await saveLocalFolders(updatedCached);
 
     // 4. Remote Sync
-    if (user && isFirebaseEnabled && db) {
-      try {
-        await setDoc(doc(db, 'users', user.uid, 'folders', updatedFolder.id), {
-          id: encFolder.id,
-          name: encFolder.name,
-          ownerId: user.uid,
-          isEncrypted: encFolder.isEncrypted,
-          createdAt: Timestamp.fromMillis(encFolder.createdAt),
-          updatedAt: Timestamp.fromMillis(encFolder.updatedAt),
-          icon: encFolder.icon || '',
-          color: encFolder.color || ''
-        });
-      } catch (error) {
+    if (user) {
+      saveFolderOnServer(encFolder).catch(error => {
         console.error("Sync folder update failed:", error);
-      }
+      });
     }
   };
 
@@ -645,12 +508,10 @@ export default function App() {
       }
     }
 
-    if (user && isFirebaseEnabled && db) {
-      try {
-        await deleteDoc(doc(db, 'users', user.uid, 'folders', folderId));
-      } catch (err) {
+    if (user) {
+      deleteFolderOnServer(folderId).catch(err => {
         console.error("Remote folder delete error:", err);
-      }
+      });
     }
 
     if (selectedFolderId === folderId) {
@@ -670,12 +531,10 @@ export default function App() {
       setActiveNoteId(null);
     }
 
-    if (user && isFirebaseEnabled && db) {
-      try {
-        await deleteDoc(doc(db, 'users', user.uid, 'notes', noteId));
-      } catch (err) {
+    if (user) {
+      deleteNoteOnServer(noteId).catch(err => {
         console.error("Remote note deletion failure:", err);
-      }
+      });
     }
   };
 
@@ -758,11 +617,7 @@ export default function App() {
       setSyncStatus({ state: 'offline', message: 'In offline mode. Log in to sync.' });
       return;
     }
-    // Simple state toggle triggers snapshot refresh
-    setSyncStatus({ state: 'syncing', message: 'Manually syncing vaults...' });
-    setTimeout(() => {
-      setSyncStatus({ state: 'synced', lastSyncedAt: Date.now() });
-    }, 1200);
+    triggerSync();
   };
 
   const activeNote = decryptedNotes.find(n => n.id === activeNoteId) || null;
