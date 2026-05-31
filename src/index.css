@@ -1,0 +1,460 @@
+@import url('https://fonts.googleapis.com/css2?family=Asap+Condensed:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,450&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;650&family=Playfair+Display:ital,wght@0,400;0,650;1,400&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-condensed: "Asap Condensed", sans-serif;
+  --font-heading: "Plus Jakarta Sans", sans-serif;
+}
+
+@variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+  .dark {
+    color-scheme: dark;
+  }
+}
+
+/* Base formatting overrides for markdown styles rendering */
+.markdown-body {
+  font-family: inherit;
+  line-height: inherit;
+}
+.markdown-body h1 {
+  font-family: var(--font-heading);
+  font-size: 1.85em;
+  font-weight: 800;
+  margin-top: 1.25em;
+  margin-bottom: 0.6em;
+  letter-spacing: -0.025em;
+}
+.markdown-body h2 {
+  font-family: var(--font-heading);
+  font-size: 1.45em;
+  font-weight: 700;
+  margin-top: 1.15em;
+  margin-bottom: 0.5em;
+  letter-spacing: -0.02em;
+}
+.markdown-body h3 {
+  font-family: var(--font-heading);
+  font-size: 1.25em;
+  font-weight: 700;
+  margin-top: 1em;
+  margin-bottom: 0.4em;
+  letter-spacing: -0.015em;
+}
+.markdown-body p {
+  margin-top: 0;
+  margin-bottom: 0.85em;
+}
+.markdown-body ul, .markdown-body ol {
+  padding-left: 1.5em;
+  margin-bottom: 0.85em;
+}
+.markdown-body li {
+  margin-bottom: 0.25em;
+}
+.markdown-body ul {
+  list-style-type: list-style;
+}
+.markdown-body code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background-color: rgba(148, 163, 184, 0.12);
+  padding: 0.15em 0.35em;
+  border-radius: 4px;
+}
+.markdown-body pre {
+  background-color: rgba(15, 23, 42, 0.05);
+  padding: 1em;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin-bottom: 1em;
+}
+.dark .markdown-body pre {
+  background-color: rgba(15, 23, 42, 0.4);
+}
+.markdown-body pre code {
+  background-color: transparent;
+  padding: 0;
+}
+.markdown-body blockquote {
+  border-left: 3px solid #6366f1;
+  padding-left: 1em;
+  color: #64748b;
+  font-style: italic;
+  margin-bottom: 1em;
+}
+.dark .markdown-body blockquote {
+  color: #94a3b8;
+}
+
+/* Custom transitions and scrollbar designs */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(153, 163, 184, 0.2);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(153, 163, 184, 0.4);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.18);
+  border-radius: 99px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.4);
+}
+
+.custom-scrollbar-h::-webkit-scrollbar {
+  height: 3px;
+}
+.custom-scrollbar-h::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar-h::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.2);
+  border-radius: 99px;
+}
+.custom-scrollbar-h::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.4);
+}
+
+/* Color theme parameters for personalized styled notes */
+.note-theme-slate {
+  --note-border-color: rgba(148, 163, 184, 0.25);
+  --note-accent-color: #64748b;
+  --note-accent-glow: rgba(140, 152, 172, 0.08);
+}
+.note-theme-indigo {
+  --note-border-color: rgba(99, 102, 241, 0.35);
+  --note-accent-color: #6366f1;
+  --note-accent-glow: rgba(99, 102, 241, 0.08);
+}
+.note-theme-emerald {
+  --note-border-color: rgba(16, 185, 129, 0.35);
+  --note-accent-color: #10b981;
+  --note-accent-glow: rgba(16, 185, 129, 0.08);
+}
+.note-theme-amber {
+  --note-border-color: rgba(245, 158, 11, 0.35);
+  --note-accent-color: #f59e0b;
+  --note-accent-glow: rgba(245, 158, 11, 0.08);
+}
+.note-theme-rose {
+  --note-border-color: rgba(244, 63, 94, 0.35);
+  --note-accent-color: #f43f5e;
+  --note-accent-glow: rgba(244, 63, 94, 0.08);
+}
+.note-theme-violet {
+  --note-border-color: rgba(139, 92, 246, 0.35);
+  --note-accent-color: #8b5cf6;
+  --note-accent-glow: rgba(139, 92, 246, 0.08);
+}
+
+/* Markdown tables render styling */
+.markdown-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.25rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.95em;
+  color: inherit;
+}
+.markdown-body th, .markdown-body td {
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  padding: 0.65em 1em;
+  text-align: left;
+}
+.markdown-body th {
+  background-color: rgba(148, 163, 184, 0.08);
+  font-weight: 700;
+  border-bottom: 2px solid rgba(148, 163, 184, 0.35);
+}
+.markdown-body tr:nth-child(even) {
+  background-color: rgba(148, 163, 184, 0.03);
+}
+
+/* Marker / Highlights in Markdown */
+.markdown-body mark {
+  background-color: rgba(251, 191, 36, 0.3);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  color: inherit;
+}
+.dark .markdown-body mark {
+  background-color: rgba(245, 158, 11, 0.25);
+  color: #fbbf24;
+}
+
+/* Custom interactive checklist input buttons */
+.markdown-body ul li input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 15px;
+  height: 15px;
+  border: 1.5px solid #818cf8;
+  border-radius: 4px;
+  outline: none;
+  background-color: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.4rem;
+  margin-top: -2px;
+  vertical-align: middle;
+  transition: all 0.15s ease;
+}
+.markdown-body ul li input[type="checkbox"]:checked {
+  background-color: #6366f1;
+  border-color: #6366f1;
+}
+.markdown-body ul li input[type="checkbox"]:checked::after {
+  content: "✓";
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+  transform: translateY(-0.5px);
+}
+
+/* ContentEditable visual styling & placeholder rule */
+#editor_contenteditable:empty::before {
+  content: attr(data-placeholder);
+  color: #94a3b8;
+  font-style: italic;
+  font-size: 0.95em;
+  pointer-events: none;
+  display: block;
+}
+.dark #editor_contenteditable:empty::before {
+  color: #4b5563;
+}
+#editor_contenteditable h1 {
+  font-family: var(--font-heading);
+  font-size: 1.85em;
+  font-weight: 800;
+  margin-top: 1.25rem;
+  margin-bottom: 0.6rem;
+  letter-spacing: -0.025em;
+}
+#editor_contenteditable h2 {
+  font-family: var(--font-heading);
+  font-size: 1.45em;
+  font-weight: 700;
+  margin-top: 1.15rem;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+#editor_contenteditable h3 {
+  font-family: var(--font-heading);
+  font-size: 1.25em;
+  font-weight: 700;
+  margin-top: 1rem;
+  margin-bottom: 0.4rem;
+  letter-spacing: -0.015em;
+}
+#editor_contenteditable img {
+  max-width: 100%;
+  border-radius: 12px;
+  margin: 1rem 0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+#editor_contenteditable table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+#editor_contenteditable td, #editor_contenteditable th {
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  padding: 8px 12px;
+}
+
+/* Attachment blocks styling for contentEditable and preview */
+.yt-attachment, .voice-attachment {
+  user-select: none;
+  cursor: default;
+}
+.yt-attachment a, .voice-attachment button {
+  cursor: pointer;
+}
+.voice-attachment audio {
+  height: 36px;
+}
+
+/* Futuristic HUD Theme - Memento Vault Profile */
+[class*="bg-[#040914]"],
+[class*="bg-[#040914]"] * {
+  background-image: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+[class*="bg-[#040914]"] {
+  background-color: #0D111A !important;
+}
+
+[class*="bg-[#040914]"] .rounded-2xl {
+  border-radius: 10px !important;
+}
+
+[class*="bg-[#040914]"] .rounded-xl {
+  border-radius: 10px !important;
+}
+
+/* Sidebar Note Cards */
+[class*="bg-[#040914]"] button.rounded-2xl.border {
+  background-color: #0D111A !important;
+  box-shadow: none !important;
+}
+
+/* Icon Container background */
+[class*="bg-[#040914]"] .rounded-xl.border.flex.items-center.justify-center {
+  background-color: #161A26 !important;
+  border-color: transparent !important;
+}
+
+/* Muted Typography & Carets */
+[class*="bg-[#040914]"] .text-slate-400,
+[class*="bg-[#040914]"] .text-zinc-500,
+[class*="bg-[#040914]"] .text-slate-505,
+[class*="bg-[#040914]"] .text-slate-450,
+[class*="bg-[#040914]"] .text-slate-605,
+[class*="bg-[#040914]"] .text-slate-650,
+[class*="bg-[#040914]"] .text-zinc-450,
+[class*="bg-[#040914]"] svg.lucide-chevron-right,
+[class*="bg-[#040914]"] .text-slate-350,
+[class*="bg-[#040914]"] .text-zinc-650,
+[class*="bg-[#040914]"] span.font-condensed.text-\[11px\].tracking-widest {
+  color: #7A8190 !important;
+}
+
+/* Caret Pseudo-element for Compact Mode */
+[class*="bg-[#040914]"] button.py-\[5px\].px-3::after {
+  content: '›';
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #7A8190;
+  font-family: serif;
+  font-size: 20px;
+  font-weight: 300;
+  pointer-events: none;
+}
+
+/* Compact Mode Gap 2 Override */
+/* Target the space-y-2.5 containers specifically when they contain compact items (py-[5px]) */
+.space-y-2\.5:has(button.py-\[5px\]) {
+  gap: 2px !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.space-y-2\.5:has(button.py-\[5px\]) > * + * {
+  margin-top: 2px !important;
+}
+
+/* Categorized Element Schemes for FUTURISTIC HUD rows/tags */
+/* Purple Theme */
+[class*="bg-[#040914]"] .border-violet-500,
+[class*="bg-[#040914]"] .border-violet-550,
+[class*="bg-[#040914]"] .border-violet-600,
+[class*="bg-[#040914]"] .border-violet-200\/20,
+[class*="bg-[#040914]"] .border-rose-500,
+[class*="bg-[#040914]"] .border-rose-550,
+[class*="bg-[#040914]"] .border-rose-600,
+[class*="bg-[#040914]"] .border-rose-200\/20 {
+  border-color: #42285A !important;
+}
+[class*="bg-[#040914]"] button[class*="border-violet"] span[class*="px-1.5"],
+[class*="bg-[#040914]"] button[class*="border-rose"] span[class*="px-1.5"] {
+  background-color: #AB69C6 !important;
+  color: white !important;
+  border-color: #AB69C6 !important;
+}
+
+/* Blue Theme */
+[class*="bg-[#040914]"] .border-indigo-505,
+[class*="bg-[#040914]"] .border-indigo-500,
+[class*="bg-[#040914]"] .border-indigo-600,
+[class*="bg-[#040914]"] .border-indigo-200\/20,
+[class*="bg-[#040914]"] .border-slate-400,
+[class*="bg-[#040914]"] .border-slate-500,
+[class*="bg-[#040914]"] .border-slate-205 {
+  border-color: #193153 !important;
+}
+[class*="bg-[#040914]"] button[class*="border-indigo"] span[class*="px-1.5"],
+[class*="bg-[#040914]"] button[class*="border-slate"] span[class*="px-1.5"] {
+  background-color: #183D6D !important;
+  color: white !important;
+  border-color: #183D6D !important;
+}
+
+/* Teal Theme */
+[class*="bg-[#040914]"] .border-emerald-500,
+[class*="bg-[#040914]"] .border-emerald-550,
+[class*="bg-[#040914]"] .border-emerald-600,
+[class*="bg-[#040914]"] .border-emerald-200\/20,
+[class*="bg-[#040914]"] .border-cyan-500,
+[class*="bg-[#040914]"] .border-cyan-600,
+[class*="bg-[#040914]"] .border-cyan-200\/20 {
+  border-color: #1A3B45 !important;
+}
+[class*="bg-[#040914]"] button[class*="border-emerald"] span[class*="px-1.5"],
+[class*="bg-[#040914]"] button[class*="border-cyan"] span[class*="px-1.5"] {
+  background-color: #2D6F84 !important;
+  color: white !important;
+  border-color: #2D6F84 !important;
+}
+
+/* Olive Theme */
+[class*="bg-[#040914]"] .border-amber-500,
+[class*="bg-[#040914]"] .border-amber-550,
+[class*="bg-[#040914]"] .border-amber-600,
+[class*="bg-[#040914]"] .border-amber-200\/20 {
+  border-color: #3A3420 !important;
+}
+[class*="bg-[#040914]"] button[class*="border-amber"] span[class*="px-1.5"] {
+  background-color: #5B502C !important;
+  color: white !important;
+  border-color: #5B502C !important;
+}
+
+/* Specific overrides for the Add Note sidebar card */
+.h-\[68px\] {
+  box-shadow: none !important;
+  padding: 5px !important;
+  gap: 5px !important;
+  border-color: #1E252D !important;
+  background-color: #0A1016 !important;
+}
+
+.h-\[68px\] > button:first-of-type {
+  flex: 0 0 105px !important;
+}
+
+.h-\[68px\] > div:nth-child(2) {
+  flex: 1 1 auto !important;
+  width: auto !important;
+}

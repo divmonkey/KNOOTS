@@ -1,0 +1,8 @@
+{
+  "name": "Note Taking App",
+  "description": "A sleek and minimalist markdown note-taking app featuring secure client-side end-to-end encryption, folder organization, fast local search, offline-first local persistence, and cloud synchronization.",
+  "requestFramePermissions": ["microphone", "publickey-credentials-create", "publickey-credentials-get"],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

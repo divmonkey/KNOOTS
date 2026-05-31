@@ -1,0 +1,130 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. Global Safety Net - Default Deny Catch-All
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Hardened Global Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Helper to get proposed write state
+    function incoming() {
+      return request.resource.data;
+    }
+
+    // Helper to get existing stored state
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Entity Specific Validation Blueprints ---
+
+    function isValidFolder(data) {
+      return data.keys().hasAll(['id', 'name', 'ownerId', 'isEncrypted', 'createdAt', 'updatedAt'])
+        && data.id is string 
+        && isValidId(data.id)
+        && data.name is string 
+        && data.name.size() <= 512
+        && data.ownerId is string 
+        && data.ownerId == request.auth.uid
+        && data.isEncrypted is bool
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp
+        && (!data.keys().contains('icon') || data.icon is string)
+        && (!data.keys().contains('color') || data.color is string);
+    }
+
+    function isValidNote(data) {
+      return data.keys().hasAll(['id', 'title', 'content', 'folderId', 'ownerId', 'isEncrypted', 'createdAt', 'updatedAt'])
+        && data.id is string
+        && isValidId(data.id)
+        && data.title is string
+        && data.title.size() <= 1024
+        && data.content is string
+        && data.content.size() <= 1048576
+        && data.folderId is string
+        && (data.folderId == "" || isValidId(data.folderId))
+        && data.ownerId is string
+        && data.ownerId == request.auth.uid
+        && data.isEncrypted is bool
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp
+        && (!data.keys().contains('color') || data.color is string)
+        && (!data.keys().contains('fontSize') || data.fontSize is string)
+        && (!data.keys().contains('fontFamily') || data.fontFamily is string)
+        && (!data.keys().contains('icon') || data.icon is string)
+        && (!data.keys().contains('tags') || data.tags is list)
+        && (!data.keys().contains('primaryTag') || data.primaryTag is string);
+    }
+
+    // --- Routes and Scopes ---
+
+    // Folders Collection
+    match /users/{userId}/folders/{folderId} {
+      allow get: if isSignedIn() && isOwner(userId) && isValidId(folderId);
+      allow list: if isSignedIn() && isOwner(userId);
+      
+      allow create: if isSignedIn() 
+        && isVerified() 
+        && isOwner(userId) 
+        && isValidId(folderId) 
+        && folderId == incoming().id
+        && isValidFolder(incoming());
+        
+      allow update: if isSignedIn() 
+        && isVerified() 
+        && isOwner(userId) 
+        && isValidId(folderId)
+        && isValidFolder(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().ownerId == existing().ownerId
+        && incoming().diff(existing()).affectedKeys().hasOnly(['name', 'isEncrypted', 'updatedAt', 'icon', 'color']);
+        
+      allow delete: if isSignedIn() && isOwner(userId) && isValidId(folderId);
+    }
+
+    // Notes Collection
+    match /users/{userId}/notes/{noteId} {
+      allow get: if isSignedIn() && isOwner(userId) && isValidId(noteId);
+      allow list: if isSignedIn() && isOwner(userId);
+      
+      allow create: if isSignedIn() 
+        && isVerified() 
+        && isOwner(userId) 
+        && isValidId(noteId)
+        && noteId == incoming().id
+        && isValidNote(incoming())
+        // Relational check: verify the note's folder belongs to this same user
+        && (incoming().folderId == "" || get(/databases/$(database)/documents/users/$(userId)/folders/$(incoming().folderId)).data.ownerId == request.auth.uid);
+        
+      allow update: if isSignedIn()
+        && isVerified() 
+        && isOwner(userId) 
+        && isValidId(noteId)
+        && isValidNote(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().ownerId == existing().ownerId
+        && (incoming().folderId == "" || get(/databases/$(database)/documents/users/$(userId)/folders/$(incoming().folderId)).data.ownerId == request.auth.uid)
+        && incoming().diff(existing()).affectedKeys().hasOnly(['title', 'content', 'folderId', 'isEncrypted', 'updatedAt', 'color', 'fontSize', 'fontFamily', 'icon', 'tags', 'primaryTag']);
+        
+      allow delete: if isSignedIn() && isOwner(userId) && isValidId(noteId);
+    }
+  }
+}
