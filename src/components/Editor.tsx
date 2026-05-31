@@ -859,11 +859,9 @@ export default function Editor({
         ...note,
         updatedAt: Date.now()
       });
-      // Simulate/Wait for background sync confirmation
+      setSaveStatus('saved');
       if (!note.tags || note.tags.length === 0) {
         showShortcutsPulse('Note saved without a tag. Add a tag to improve organization.');
-      } else {
-        setSaveStatus('saved');
       }
       setShowStylesPanel(false); // Close control drawer after saving process (Req 3)
       setTimeout(() => setSaveStatus('idle'), 2500);

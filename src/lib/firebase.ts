@@ -85,8 +85,8 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
   throw new Error(JSON.stringify(errInfo));
 }
 
-// Cache the access token in memory.
-let cachedAccessToken: string | null = null;
+// Cache the access token in memory/localStorage.
+let cachedAccessToken: string | null = localStorage.getItem('knoots_google_access_token');
 
 // Called once on app startup to capture the result of a redirect sign-in flow.
 // When the popup is blocked, loginWithGoogle falls back to redirect; this picks up
@@ -99,6 +99,7 @@ export async function handleRedirectResult(): Promise<{ user: User; accessToken:
     const credential = GoogleAuthProvider.credentialFromResult(result);
     if (!credential?.accessToken) return null;
     cachedAccessToken = credential.accessToken;
+    localStorage.setItem('knoots_google_access_token', cachedAccessToken);
     return { user: result.user, accessToken: cachedAccessToken };
   } catch (error) {
     console.error('Redirect result error:', error);
@@ -123,6 +124,7 @@ export async function loginWithGoogle(): Promise<{ user: User; accessToken: stri
       throw new Error('Failed to get access token from Firebase Auth');
     }
     cachedAccessToken = credential.accessToken;
+    localStorage.setItem('knoots_google_access_token', cachedAccessToken);
     return { user: result.user, accessToken: cachedAccessToken };
   } catch (error: any) {
     // Popup was blocked by the browser (iframe / tracking protection) — use redirect instead.
@@ -146,6 +148,7 @@ export async function logoutUser(): Promise<void> {
   if (!isFirebaseEnabled || !auth) return;
   await signOut(auth);
   cachedAccessToken = null;
+  localStorage.removeItem('knoots_google_access_token');
 }
 
 export {

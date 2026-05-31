@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KNOOTS — Feature Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            glow: 'rgba(99, 102, 241, 0.15)',
+                            primary: '#6366f1',
+                            teal: '#14b8a6',
+                            rose: '#f43f5e'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #030712;
+            color: #f3f4f6;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(20, 184, 166, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+        .dashboard-border {
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .glass-card {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .glass-card:hover {
+            transform: translateY(-4px) scale(1.01);
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 12px 40px rgba(99, 102, 241, 0.12);
+        }
+        .active-tab {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.4);
+            color: #a5b4fc;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #030712;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f2937;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #374151;
+        }
+    </style>
+</head>
+<body class="min-h-screen py-10 px-4 sm:px-6 lg:px-8 font-sans antialiased">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row items-center justify-between gap-6 mb-12 pb-8 border-b border-white/5">
+            <div class="flex items-center gap-4">
+                <div class="h-14 w-14 bg-indigo-650 bg-gradient-to-tr from-indigo-600 to-indigo-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/30 font-black tracking-tight text-2xl select-none">
+                    K
+                </div>
+                <div>
+                    <h1 class="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-slate-400">
+                        KNOOTS Showcase
+                    </h1>
+                    <p class="text-sm text-slate-400 font-medium">Active Capabilities & Technical Blueprint</p>
+                </div>
+            </div>
+            
+            <a href="/" class="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-xl text-sm font-semibold tracking-wide transition-all shadow-sm flex items-center gap-2 text-indigo-300 hover:text-white">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Back to Workspace
+            </a>
+        </header>
+
+        <!-- Stats Grid -->
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+            <div class="glass-card p-5 rounded-2xl flex flex-col">
+                <span class="text-xxs font-bold uppercase tracking-wider text-slate-400">Architecture</span>
+                <span class="text-xl font-bold text-white mt-1">Client-Side E2E</span>
+            </div>
+            <div class="glass-card p-5 rounded-2xl flex flex-col">
+                <span class="text-xxs font-bold uppercase tracking-wider text-slate-400">AI Engine</span>
+                <span class="text-xl font-bold text-teal-400 mt-1">Gemini 2.5/3.1</span>
+            </div>
+            <div class="glass-card p-5 rounded-2xl flex flex-col">
+                <span class="text-xxs font-bold uppercase tracking-wider text-slate-400">Databases</span>
+                <span class="text-xl font-bold text-indigo-400 mt-1">Firestore + IDB</span>
+            </div>
+            <div class="glass-card p-5 rounded-2xl flex flex-col">
+                <span class="text-xxs font-bold uppercase tracking-wider text-slate-400">Active Features</span>
+                <span class="text-xl font-bold text-white mt-1">12 Systems</span>
+            </div>
+        </section>
+
+        <!-- Navigation Tabs -->
+        <nav class="flex flex-wrap gap-2 mb-10 pb-4 overflow-x-auto border-b border-white/5" id="categories">
+            <button onclick="filterCategory('all')" id="tab-all" class="active-tab px-4 py-2 text-xs font-bold rounded-xl border border-white/5 hover:border-white/10 hover:bg-white/5 transition-all uppercase tracking-wider whitespace-nowrap cursor-pointer">
+                All Systems
+            </button>
+            <button onclick="filterCategory('security')" id="tab-security" class="px-4 py-2 text-xs font-bold rounded-xl border border-white/5 hover:border-white/10 hover:bg-white/5 transition-all uppercase tracking-wider whitespace-nowrap cursor-pointer">
+                Security & Encryption
+            </button>
+            <button onclick="filterCategory('ai')" id="tab-ai" class="px-4 py-2 text-xs font-bold rounded-xl border border-white/5 hover:border-white/10 hover:bg-white/5 transition-all uppercase tracking-wider whitespace-nowrap cursor-pointer">
+                AI & Translation
+            </button>
+            <button onclick="filterCategory('editor')" id="tab-editor" class="px-4 py-2 text-xs font-bold rounded-xl border border-white/5 hover:border-white/10 hover:bg-white/5 transition-all uppercase tracking-wider whitespace-nowrap cursor-pointer">
+                Editor & UI
+            </button>
+            <button onclick="filterCategory('integrations')" id="tab-integrations" class="px-4 py-2 text-xs font-bold rounded-xl border border-white/5 hover:border-white/10 hover:bg-white/5 transition-all uppercase tracking-wider whitespace-nowrap cursor-pointer">
+                Cloud & Sync
+            </button>
+        </nav>
+
+        <!-- Showcase Grid -->
+        <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16" id="features-grid">
+            
+            <!-- E2E Encryption -->
+            <article class="glass-card rounded-3xl overflow-hidden flex flex-col group" data-category="security">
+                <div class="h-44 w-full bg-slate-950 relative overflow-hidden border-b border-white/5">
+                    <img src="screenshots/encryption_modal.png" alt="End-to-End Encryption" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-[1.03] transition-all duration-500">
+                    <span class="absolute top-4 left-4 px-2.5 py-1 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg text-[10px] font-bold uppercase tracking-widest">
+                        Crypto
+                    </span>
+                </div>
+                <div class="p-6 flex-grow flex flex-col">
+                    <h3 class="text-lg font-bold text-white mb-2">End-to-End Encryption</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed mb-4">On-device AES-GCM-256 wrapping via WebCrypto API. Note contents are fully encrypted before leaving the client browser.</p>
+                    <div class="mt-auto flex items-center justify-between text-[10px] text-slate-500 font-mono">
+                        <span>WebCrypto API</span>
+                        <span>AES-GCM-256</span>
+                    </div>
+                </div>
+            </article>
+
+            <!-- WebAuthn -->
+            <article class="glass-card rounded-3xl overflow-hidden flex flex-col group" data-category="security">
+                <div class="h-44 w-full bg-slate-950 relative overflow-hidden border-b border-white/5">
+                    <img src="screenshots/encryption_modal.png" alt="WebAuthn Key Protection" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-[1.03] transition-all duration-500">
+                    <span class="absolute top-4 left-4 px-2.5 py-1 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg text-[10px] font-bold uppercase tracking-widest">
+                        Hardware
+                    </span>
+                </div>
+                <div class="p-6 flex-grow flex flex-col">
+                    <h3 class="text-lg font-bold text-white mb-2">WebAuthn Biometrics</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed mb-4">Hardware key protection allowing vault unlocking via FaceID, TouchID, or Windows Hello security credentials.</p>
+                    <div class="mt-auto flex items-center justify-between text-[10px] text-slate-500 font-mono">
+                        <span>FIDO2 / WebAuthn</span>
+                        <span>Biometrics</span>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Settings Modal -->
+            <article class="glass-card rounded-3xl overflow-hidden flex flex-col group" data-category="security">
+                <div class="h-44 w-full bg-slate-950 relative overflow-hidden border-b border-white/5">
+                    <img src="screenshots/settings_modal.png" alt="Preferences Control Center" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-[1.03] transition-all duration-500">
+                    <span class="absolute top-4 left-4 px-2.5 py-1 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-lg text-[10px] font-bold uppercase tracking-widest">
+                        Security
+                    </span>
+                </div>
+                <div class="p-6 flex-grow flex flex-col">
+                    <h3 class="text-lg font-bold text-white mb-2">Preferences Center</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed mb-4">Central settings console governing design themes, typographic preferences, biometric configuration, and backup imports.</p>
+                    <div class="mt-auto flex items-center justify-between text-[10px] text-slate-500 font-mono">
+                        <span>SettingsModal.tsx</span>
+                        <span>Preferences</span>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Gemini AI -->
+            <article class="glass-card rounded-3xl overflow-hidden flex flex-col group" data-category="ai">
+                <div class="h-44 w-full bg-slate-950 relative overflow-hidden border-b border-white/5">
+                    <img src="screenshots/ai_prompt_modal.png" alt="Gemini AI Integration" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-[1.03] transition-all duration-500">
+                    <span class="absolute top-4 left-4 px-2.5 py-1 bg-teal-500/20 text-teal-400 border border-teal-500/30 rounded-lg text-[10px] font-bold uppercase tracking-widest">
+                        Intelligence
+                    </span>
+                </div>
+                <div class="p-6 flex-grow flex flex-col">
+                    <h3 class="text-lg font-bold text-white mb-2">Google Gemini AI</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed mb-4">Multi-Tone prompt wizard to transform note snippets into variants optimized for LinkedIn, X (Twitter), or Threads.</p>
+                    <div class="mt-auto flex items-center justify-between text-[10px] text-slate-500 font-mono">
+                        <span>@google/genai</span>
+                        <span>Multi-Tone</span>
+                    </div>
+                </div>
+            </article>
+
+            <!-- LibreTranslate -->
+            <article class="glass-card rounded-3xl overflow-hidden flex flex-col group" data-category="ai">
+                <div class="h-44 w-full bg-slate-950 relative overflow-hidden border-b border-white/5">
+                    <img src="screenshots/translate_modal.png" alt="LibreTranslate" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-[1.03] transition-all duration-500">
+                    <span class="absolute top-4 left-4 px-2.5 py-1 bg-teal-500/20 text-teal-400 border border-teal-500/30 rounded-lg text-[10px] font-bold uppercase tracking-widest">
+                        Translation
+                    </span>
+                </div>
+                <div class="p-6 flex-grow flex flex-col">
+                    <h3 class="text-lg font-bold text-white mb-2">Machine Translation</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed mb-4">Integrated client-side translation supporting dynamic cross-language translation directly in the note-writing canvas.</p>
+                    <div class="mt-auto flex items-center justify-between text-[10px] text-slate-500 font-mono">
+                        <span>Google Translate API</span>
+                        <span>LibreTranslate</span>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Note Editor -->
+            <article class="glass-card rounded-3xl overflow-hidden flex flex-col group" data-category="editor">
+                <div class="h-44 w-full bg-slate-950 relative overflow-hidden border-b border-white/5">
+                    <img src="screenshots/main_editor.png" alt="Rich Note Editor" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-[1.03] transition-all duration-500">
+                    <span class="absolute top-4 left-4 px-2.5 py-1 bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded-lg text-[10px] font-bold uppercase tracking-widest">
+                        Core Canvas
+                    </span>
+                </div>
+                <div class="p-6 flex-grow flex flex-col">
+                    <h3 class="text-lg font-bold text-white mb-2">Bento Note Editor</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed mb-4">Powerful Markdown & rich text dual editor canvas supporting voice memos, YouTube embedding, and custom styling.</p>
+                    <div class="mt-auto flex items-center justify-between text-[10px] text-slate-500 font-mono">
+                        <span>Editor.tsx</span>
+                        <span>Markdown & Rich</span>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Sidebar Navigation -->
+            <article class="glass-card rounded-3xl overflow-hidden flex flex-col group" data-category="editor">
+                <div class="h-44 w-full bg-slate-950 relative overflow-hidden border-b border-white/5">
+                    <img src="screenshots/sidebar.png" alt="Sidebar Navigation" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-[1.03] transition-all duration-500">
+                    <span class="absolute top-4 left-4 px-2.5 py-1 bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded-lg text-[10px] font-bold uppercase tracking-widest">
+                        Core Navigation
+                    </span>
+                </div>
+                <div class="p-6 flex-grow flex flex-col">
+                    <h3 class="text-lg font-bold text-white mb-2">Bento Sidebar Navigator</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed mb-4">Flexible file structure management featuring folder tags, custom folder icons, text search, and key status indicators.</p>
+                    <div class="mt-auto flex items-center justify-between text-[10px] text-slate-500 font-mono">
+                        <span>Sidebar.tsx</span>
+                        <span>Bento Grid Nav</span>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Code Highlighting -->
+            <article class="glass-card rounded-3xl overflow-hidden flex flex-col group" data-category="editor">
+                <div class="h-44 w-full bg-slate-950 relative overflow-hidden border-b border-white/5">
+                    <img src="screenshots/main_editor.png" alt="Code Syntax Highlighting" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-[1.03] transition-all duration-500">
+                    <span class="absolute top-4 left-4 px-2.5 py-1 bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded-lg text-[10px] font-bold uppercase tracking-widest">
+                        Renderer
+                    </span>
+                </div>
+                <div class="p-6 flex-grow flex flex-col">
+                    <h3 class="text-lg font-bold text-white mb-2">Syntax Highlighting</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed mb-4">Real-time markdown code block highlighting engine supporting Dracula, Github Dark/Light, and Solarized themes.</p>
+                    <div class="mt-auto flex items-center justify-between text-[10px] text-slate-500 font-mono">
+                        <span>CodeHighlighter.tsx</span>
+                        <span>Syntax Themes</span>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Workspace Picker -->
+            <article class="glass-card rounded-3xl overflow-hidden flex flex-col group" data-category="integrations">
+                <div class="h-44 w-full bg-slate-950 relative overflow-hidden border-b border-white/5">
+                    <img src="screenshots/workspace_picker.png" alt="Google Workspace Integration" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-[1.03] transition-all duration-500">
+                    <span class="absolute top-4 left-4 px-2.5 py-1 bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded-lg text-[10px] font-bold uppercase tracking-widest">
+                        Integrations
+                    </span>
+                </div>
+                <div class="p-6 flex-grow flex flex-col">
+                    <h3 class="text-lg font-bold text-white mb-2">Workspace Asset Picker</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed mb-4">Direct Google Drive integration displaying doc and spreadsheet catalogs to embed live document previews.</p>
+                    <div class="mt-auto flex items-center justify-between text-[10px] text-slate-500 font-mono">
+                        <span>Google Drive API</span>
+                        <span>Doc Embedding</span>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Firebase Authentication -->
+            <article class="glass-card rounded-3xl overflow-hidden flex flex-col group" data-category="integrations">
+                <div class="h-44 w-full bg-slate-950 relative overflow-hidden border-b border-white/5">
+                    <img src="screenshots/main_editor.png" alt="Firebase Google Auth" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-[1.03] transition-all duration-500">
+                    <span class="absolute top-4 left-4 px-2.5 py-1 bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded-lg text-[10px] font-bold uppercase tracking-widest">
+                        Cloud
+                    </span>
+                </div>
+                <div class="p-6 flex-grow flex flex-col">
+                    <h3 class="text-lg font-bold text-white mb-2">Firebase Auth & Login</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed mb-4">Google Sign-in popup integration verifying identity scopes and managing token caching locally.</p>
+                    <div class="mt-auto flex items-center justify-between text-[10px] text-slate-500 font-mono">
+                        <span>Firebase Auth</span>
+                        <span>Google OAuth</span>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Cloud Sync -->
+            <article class="glass-card rounded-3xl overflow-hidden flex flex-col group" data-category="integrations">
+                <div class="h-44 w-full bg-slate-950 relative overflow-hidden border-b border-white/5">
+                    <img src="screenshots/main_editor.png" alt="Cloud Firestore Sync" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-[1.03] transition-all duration-500">
+                    <span class="absolute top-4 left-4 px-2.5 py-1 bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded-lg text-[10px] font-bold uppercase tracking-widest">
+                        Sync
+                    </span>
+                </div>
+                <div class="p-6 flex-grow flex flex-col">
+                    <h3 class="text-lg font-bold text-white mb-2">Cloud Firestore Sync</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed mb-4">Secure user-scoped notes database synchronization featuring real-time Firestore listeners and collision protection.</p>
+                    <div class="mt-auto flex items-center justify-between text-[10px] text-slate-500 font-mono">
+                        <span>Cloud Firestore</span>
+                        <span>Real-time DB</span>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Offline Mode -->
+            <article class="glass-card rounded-3xl overflow-hidden flex flex-col group" data-category="editor">
+                <div class="h-44 w-full bg-slate-950 relative overflow-hidden border-b border-white/5">
+                    <img src="screenshots/main_editor.png" alt="Offline Mode" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-[1.03] transition-all duration-500">
+                    <span class="absolute top-4 left-4 px-2.5 py-1 bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded-lg text-[10px] font-bold uppercase tracking-widest">
+                        Offline
+                    </span>
+                </div>
+                <div class="p-6 flex-grow flex flex-col">
+                    <h3 class="text-lg font-bold text-white mb-2">Offline-First Engine</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed mb-4">IndexedDB offline caching allowing normal editing, creation, and secure cryptography, auto-syncing upon cloud connection.</p>
+                    <div class="mt-auto flex items-center justify-between text-[10px] text-slate-500 font-mono">
+                        <span>IndexedDB / idb-keyval</span>
+                        <span>Offline Caching</span>
+                    </div>
+                </div>
+            </article>
+
+        </main>
+    </div>
+
+    <!-- Script for category filtering -->
+    <script>
+        function filterCategory(category) {
+            // Update active state in tabs
+            const tabsContainer = document.getElementById('categories');
+            const buttons = tabsContainer.getElementsByTagName('button');
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].classList.remove('active-tab');
+            }
+            
+            const activeBtn = document.getElementById(`tab-${category}`);
+            if (activeBtn) {
+                activeBtn.classList.add('active-tab');
+            }
+
+            // Filter items in grid
+            const grid = document.getElementById('features-grid');
+            const cards = grid.getElementsByTagName('article');
+            
+            for (let i = 0; i < cards.length; i++) {
+                const cardCat = cards[i].getAttribute('data-category');
+                if (category === 'all' || cardCat === category) {
+                    cards[i].classList.remove('hidden');
+                } else {
+                    cards[i].classList.add('hidden');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
