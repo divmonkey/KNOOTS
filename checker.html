@@ -20,14 +20,14 @@
     }
 
     body.theme-dark {
-      --bg-main: #090d16;
-      --bg-card: #111827;
-      --bg-card-hover: #1f2937;
-      --border-color: #1f2937;
-      --border-hover: #374151;
-      --text-primary: #f9fafb;
-      --text-secondary: #9ca3af;
-      --text-muted: #6b7280;
+      --bg-main: #0c0c0e;
+      --bg-card: #18181b;
+      --bg-card-hover: #202024;
+      --border-color: #27272a;
+      --border-hover: #3f3f46;
+      --text-primary: #f4f4f5;
+      --text-secondary: #a1a1aa;
+      --text-muted: #71717a;
       --accent: #6366f1;
       --accent-rgb: 99, 102, 241;
       --accent-hover: #4f46e5;
@@ -36,7 +36,7 @@
       --success-light: rgba(16, 185, 129, 0.1);
       --danger: #ef4444;
       --danger-light: rgba(239, 68, 68, 0.1);
-      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
       --glass-blur: none;
     }
 
@@ -57,7 +57,7 @@
       --success-light: rgba(5, 150, 105, 0.08);
       --danger: #dc2626;
       --danger-light: rgba(220, 38, 38, 0.08);
-      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
       --glass-blur: none;
     }
 
@@ -493,10 +493,6 @@
       border: 1px solid currentColor !important;
     }
 
-    .badge svg {
-      flex-shrink: 0;
-    }
-
     /* Card controls and actions */
     .card-actions {
       display: flex;
@@ -599,55 +595,120 @@
       box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
     }
 
-    /* Error logging section style */
-    .error-log-section {
+    /* Expandable Sub-checklist Section */
+    .sub-checklist-section {
       max-height: 0;
       overflow: hidden;
-      transition: max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1), padding 0.25s, border 0.25s;
+      transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
-      padding: 0;
-      border-top: 1px solid transparent;
+      gap: 0.75rem;
+      border-top: 1px dashed transparent;
+      padding-top: 0;
     }
 
-    .error-log-section.expanded {
-      max-height: 140px; 
+    .sub-checklist-section.expanded {
+      max-height: 800px; /* high limit to accommodate all sub items */
       border-top: 1px dashed var(--border-color);
-      padding-top: 0.75rem;
+      padding-top: 1rem;
       margin-top: 0.5rem;
     }
 
-    .error-log-label {
+    .sub-checklist-title {
       font-size: 0.75rem;
       color: var(--danger);
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       display: flex;
       align-items: center;
-      gap: 0.25rem;
+      gap: 0.35rem;
     }
 
-    .error-log-textarea {
-      width: 100%;
-      height: 70px;
-      background: rgba(0, 0, 0, 0.2);
+    .sub-items-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .sub-item-card {
+      background: rgba(0, 0, 0, 0.15);
       border: 1px solid var(--border-color);
       border-radius: var(--radius);
-      padding: 0.5rem 0.75rem;
-      color: var(--text-primary);
-      font-family: var(--font-body);
-      font-size: 0.85rem;
-      resize: none;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
       transition: var(--transition);
     }
 
-    body.theme-light .error-log-textarea {
+    body.theme-light .sub-item-card {
+      background: rgba(0, 0, 0, 0.01);
+    }
+
+    .sub-item-card:hover {
+      border-color: var(--border-hover);
+    }
+
+    .sub-item-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .sub-item-label-container {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      cursor: pointer;
+    }
+
+    .sub-item-checkbox {
+      margin-top: 0.2rem;
+      cursor: pointer;
+      accent-color: var(--danger);
+      width: 14px;
+      height: 14px;
+    }
+
+    .sub-item-label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .sub-item-id {
+      font-family: monospace;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .sub-item-input-container {
+      display: none;
+    }
+
+    .sub-item-input-container.active {
+      display: block;
+    }
+
+    .sub-item-input {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 0.4rem 0.6rem;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      transition: var(--transition);
+    }
+
+    body.theme-light .sub-item-input {
       background: rgba(0, 0, 0, 0.02);
     }
 
-    .error-log-textarea:focus {
+    .sub-item-input:focus {
       outline: none;
       border-color: var(--danger);
       box-shadow: 0 0 0 2px var(--danger-light);
@@ -813,7 +874,7 @@
           </svg>
           KNOOTS // QA Diagnostic Panel
         </h1>
-        <p>Automated verification workspace and bug telemetry reporter</p>
+        <p>Automated verification workspace and nested sub-audit reporting pipeline</p>
       </div>
       
       <!-- Theme Selection Matrix -->
@@ -830,7 +891,7 @@
     <div class="stats-card">
       <div class="stats-grid">
         <div class="stat-item">
-          <div class="stat-label">Total Audit Cards</div>
+          <div class="stat-label">Total Parent Cards</div>
           <div class="stat-value" id="stats-total">7</div>
         </div>
         <div class="stat-item">
@@ -905,7 +966,7 @@
   </div>
 
   <script>
-    // Configuration checklist items array
+    // Configuration parent cards and nested sub-audit arrays
     const checklistItems = [
       {
         id: "theme-contrast",
@@ -913,9 +974,15 @@
         title: "Theme Matrix & Font Contrast Legibility",
         badge: "Visual",
         badgeClass: "badge-visual",
-        badgeIcon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
+        badgeIcon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
         target: "Global CSS Variables & Typography Themes",
-        criteria: "Verify background fills and typography tokens maintain readable contrast across Dark, Light, Cyberpunk, Glassmorphism, and Futuristic HUD styles. Ensure active theme panels load text without muddy blending or color clipping."
+        criteria: "Verify background fills and typography tokens maintain readable contrast across Dark, Light, Cyberpunk, Glassmorphism, and Futuristic HUD styles.",
+        subItems: [
+          { sub_id: "theme-contrast-dark", label: "Dark Mode Basics (Cards & Main Panels)" },
+          { sub_id: "theme-contrast-light", label: "Light Mode Balance (Text & Accents)" },
+          { sub_id: "theme-contrast-glass", label: "Glassmorphism Theme (Input Blends & Borders)" },
+          { sub_id: "theme-contrast-hud", label: "Futuristic HUD Theme (Neon Text & Carets)" }
+        ]
       },
       {
         id: "tag-icon-ui",
@@ -923,9 +990,17 @@
         title: "Tags & Icons Alignment Matrix",
         badge: "Visual",
         badgeClass: "badge-visual",
-        badgeIcon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
+        badgeIcon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
         target: "Sidebar Components & Tag Group Containers",
-        criteria: "Check that custom assigned SVG or Emoji icons align with the font baseline inside the navigation cards. Verify primary tag accent borders use the correct layout color and margins without overlapping adjacent labels."
+        criteria: "Check that custom assigned SVG or Emoji icons align with the font baseline inside the navigation cards.",
+        subItems: [
+          { sub_id: "tag-icon-svg", label: "SVG Icon Component Baseline & Truncation" },
+          { sub_id: "tag-icon-emoji", label: "Native Emoji Alignment & Sizing" },
+          { sub_id: "tag-icon-purple", label: "Purple Tag Theme (#Ideas / #42285A)" },
+          { sub_id: "tag-icon-blue", label: "Blue Tag Theme (#To Do / #193153)" },
+          { sub_id: "tag-icon-teal", label: "Teal Tag Theme (#Ideas / #1A3B45)" },
+          { sub_id: "tag-icon-olive", label: "Olive Tag Theme (#Ideas / #3A3420)" }
+        ]
       },
       {
         id: "editor-quirks",
@@ -933,9 +1008,15 @@
         title: "Workspace Editor Quirks & Dynamic Layouts",
         badge: "Editor",
         badgeClass: "badge-editor",
-        badgeIcon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`,
+        badgeIcon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`,
         target: "Markdown & WYSIWYG Code Editor Elements",
-        criteria: "Inspect the split-pane live preview layouts under maximum content load. Watch out for shifting columns caused by dynamic vertical scrollbars, text clipping, or improper line-height spacing on code block highlights."
+        criteria: "Inspect the split-pane live preview layouts under maximum content load.",
+        subItems: [
+          { sub_id: "editor-split-pane", label: "Dual split-pane view width constraints" },
+          { sub_id: "editor-scroll-shift", label: "Layout shifting caused by active scrollbars" },
+          { sub_id: "editor-code-highlight", label: "Highlighting syntax readability (Dracula/Monokai)" },
+          { sub_id: "editor-wysiwyg", label: "Visual composition inline editing wrappers" }
+        ]
       },
       {
         id: "settings-modal-responsive",
@@ -943,9 +1024,14 @@
         title: "Settings Overlay Window Viewport Adjustments",
         badge: "Responsive",
         badgeClass: "badge-responsive",
-        badgeIcon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>`,
+        badgeIcon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>`,
         target: "Navigation Drawer & Settings Modal",
-        criteria: "Trigger the settings slide-in panel. Audit mobile responsive scaling down to ultra-narrow 360px viewports. The form inputs, typography adjustments, and theme toggle buttons must wrap cleanly without broken vertical layouts."
+        criteria: "Trigger the settings slide-in panel. Audit mobile responsive scaling down to ultra-narrow 360px viewports.",
+        subItems: [
+          { sub_id: "settings-desktop-modal", label: "Desktop central overlay centering & shadows" },
+          { sub_id: "settings-mobile-drawer", label: "Slide-in drawer constraints (<400px viewports)" },
+          { sub_id: "settings-sliders", label: "Sizing & typography control adjustment tracks" }
+        ]
       },
       {
         id: "core-crud",
@@ -953,9 +1039,13 @@
         title: "Core Document Operations & Live Search",
         badge: "Functional",
         badgeClass: "badge-functional",
-        badgeIcon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
+        badgeIcon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
         target: "File Tree Management & Search Modals",
-        criteria: "Test rapid note creation, folder renaming workflows, and directory migrations. Verify the fast local search index performs real-time, instantaneous filtering on full-text keys as characters are entered."
+        criteria: "Test rapid note creation, folder renaming workflows, and directory migrations. Verify the fast local search index performs real-time, instantaneous filtering.",
+        subItems: [
+          { sub_id: "crud-note-lifecycle", label: "Instant note compilation & folder migration" },
+          { sub_id: "crud-search-latency", label: "Full-text filtering index retrieval delays" }
+        ]
       },
       {
         id: "crypto-sandbox",
@@ -963,9 +1053,13 @@
         title: "Zero-Knowledge AES-GCM Sandbox Isolation",
         badge: "Security",
         badgeClass: "badge-security",
-        badgeIcon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`,
+        badgeIcon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`,
         target: "Encryption Pipeline & IndexedDB Storage",
-        criteria: "Input a secure master passphrase to lock the database. Force a hard browser page reset. Confirm that note titles, file contents, and sensitive metadata remain entirely encrypted inside local storage caches until decrypted."
+        criteria: "Input a secure master passphrase to lock the database. Force a hard browser page reset. Confirm that note titles, file contents, and sensitive metadata remain entirely encrypted.",
+        subItems: [
+          { sub_id: "crypto-passphrase", label: "Encryption panel lock state configuration" },
+          { sub_id: "crypto-indexeddb", label: "Post-reload binary validation inside IndexedDB" }
+        ]
       },
       {
         id: "sync-indicators",
@@ -973,15 +1067,20 @@
         title: "Offline Caching & Sync Indicators",
         badge: "Sync",
         badgeClass: "badge-sync",
-        badgeIcon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>`,
+        badgeIcon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>`,
         target: "Network Monitoring Layer & UI Badges",
-        criteria: "Programmatically disconnect the network interface. Edit notes to confirm the optimistic UI model updates and caches data using IndexedDB. Reconnect the network and verify the background synchronization indicators switch from offline to live states cleanly."
+        criteria: "Programmatically disconnect the network interface. Edit notes to confirm the optimistic UI model updates and caches data using IndexedDB.",
+        subItems: [
+          { sub_id: "sync-network-drop", label: "Local data staging during offline status" },
+          { sub_id: "sync-badge-states", label: "Real-time visibility transition states" }
+        ]
       }
     ];
 
     // Local state stores
-    let appStates = {};       // id -> 'pass' / 'fail' / null
-    let appDescriptions = {}; // id -> string (issue description text)
+    let appStates = {};       // parent_id -> 'pass' / 'fail' / null
+    let subCheckboxStates = {}; // sub_id -> true (failed) / false (not failed)
+    let subDescriptions = {}; // sub_id -> string (issue description text)
     let activeTheme = 'theme-dark';
 
     // Elements cache
@@ -1010,17 +1109,22 @@
     function loadWorkspaceState() {
       try {
         const storedStates = localStorage.getItem('knoots-qa-states');
-        const storedDescs = localStorage.getItem('knoots-qa-descriptions');
+        const storedSubCheckboxes = localStorage.getItem('knoots-qa-sub-checkboxes');
+        const storedSubDescs = localStorage.getItem('knoots-qa-sub-descriptions');
         const storedTheme = localStorage.getItem('knoots-qa-theme');
 
         if (storedStates) appStates = JSON.parse(storedStates);
-        if (storedDescs) appDescriptions = JSON.parse(storedDescs);
+        if (storedSubCheckboxes) subCheckboxStates = JSON.parse(storedSubCheckboxes);
+        if (storedSubDescs) subDescriptions = JSON.parse(storedSubDescs);
         if (storedTheme) activeTheme = storedTheme;
 
-        // Initialize state for items that don't have stored values
+        // Ensure defaults for structures
         checklistItems.forEach(item => {
           if (appStates[item.id] === undefined) appStates[item.id] = null;
-          if (appDescriptions[item.id] === undefined) appDescriptions[item.id] = "";
+          item.subItems.forEach(sub => {
+            if (subCheckboxStates[sub.sub_id] === undefined) subCheckboxStates[sub.sub_id] = false;
+            if (subDescriptions[sub.sub_id] === undefined) subDescriptions[sub.sub_id] = "";
+          });
         });
 
         // Set the active theme classes
@@ -1042,7 +1146,8 @@
     // Save states to local storage
     function saveWorkspaceState() {
       localStorage.setItem('knoots-qa-states', JSON.stringify(appStates));
-      localStorage.setItem('knoots-qa-descriptions', JSON.stringify(appDescriptions));
+      localStorage.setItem('knoots-qa-sub-checkboxes', JSON.stringify(subCheckboxStates));
+      localStorage.setItem('knoots-qa-sub-descriptions', JSON.stringify(subDescriptions));
     }
 
     // Recalculate metrics and update telemetry bars
@@ -1075,7 +1180,7 @@
       document.getElementById('bar-pending').style.width = pendingPct + '%';
     }
 
-    // Render all QA checkcards to their respective containers
+    // Render all parent card nodes and configure sub-checklists
     function renderChecklistCards() {
       section01El.innerHTML = "";
       section02El.innerHTML = "";
@@ -1085,22 +1190,46 @@
         const isPassed = itemState === 'pass';
         const isFailed = itemState === 'fail';
 
-        // Determine badge markup
-        const badgeMarkup = `
-          <span class="badge ${item.badgeClass}">
-            ${item.badgeIcon}
-            ${item.badge}
-          </span>
-        `;
-
         // Create card element
         const cardNode = document.createElement('div');
         cardNode.className = 'card';
         cardNode.id = `card-${item.id}`;
 
+        // Build nested sub items markup
+        let subItemsMarkup = "";
+        item.subItems.forEach(sub => {
+          const isSubFailed = subCheckboxStates[sub.sub_id] === true;
+          subItemsMarkup += `
+            <div class="sub-item-card" id="sub-card-${sub.sub_id}">
+              <div class="sub-item-header">
+                <label class="sub-item-label-container" for="checkbox-${sub.sub_id}">
+                  <input type="checkbox" 
+                         class="sub-item-checkbox" 
+                         id="checkbox-${sub.sub_id}" 
+                         data-sub-id="${sub.sub_id}"
+                         ${isSubFailed ? 'checked' : ''}>
+                  <div class="sub-item-label">${sub.label}</div>
+                </label>
+                <div class="sub-item-id">${sub.sub_id}</div>
+              </div>
+              <div class="sub-item-input-container ${isSubFailed ? 'active' : ''}" id="input-container-${sub.sub_id}">
+                <input type="text" 
+                       class="sub-item-input" 
+                       id="input-${sub.sub_id}" 
+                       data-sub-id="${sub.sub_id}"
+                       placeholder="Specify style anomalies or layout issues for this theme..."
+                       value="${subDescriptions[sub.sub_id] || ''}">
+              </div>
+            </div>
+          `;
+        });
+
         cardNode.innerHTML = `
           <div class="card-header">
-            ${badgeMarkup}
+            <span class="badge ${item.badgeClass}">
+              ${item.badgeIcon}
+              ${item.badge}
+            </span>
             <div class="card-id">ID: ${item.id}</div>
           </div>
           <h2>${item.title}</h2>
@@ -1125,26 +1254,26 @@
             </div>
           </div>
 
-          <div class="error-log-section ${isFailed ? 'expanded' : ''}" id="log-section-${item.id}">
-            <div class="error-log-label">
+          <!-- Nested sub-audit checklist loops -->
+          <div class="sub-checklist-section ${isFailed ? 'expanded' : ''}" id="sub-section-${item.id}">
+            <div class="sub-checklist-title">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
                 <line x1="12" y1="9" x2="12" y2="13"/>
                 <line x1="12" y1="17" x2="12.01" y2="17"/>
               </svg>
-              Describe Failure Anomaly:
+              Select Failed Components:
             </div>
-            <textarea class="error-log-textarea" 
-                      id="textarea-${item.id}" 
-                      placeholder="Input console details, layout shift details, or sync failures...">${appDescriptions[item.id] || ''}</textarea>
+            <div class="sub-items-container">
+              ${subItemsMarkup}
+            </div>
           </div>
         `;
 
         // Bind events
         const btnPass = cardNode.querySelector(`#btn-pass-${item.id}`);
         const btnFail = cardNode.querySelector(`#btn-fail-${item.id}`);
-        const logSection = cardNode.querySelector(`#log-section-${item.id}`);
-        const textarea = cardNode.querySelector(`#textarea-${item.id}`);
+        const subSection = cardNode.querySelector(`#sub-section-${item.id}`);
         const indicator = cardNode.querySelector(`#indicator-${item.id}`);
         const label = cardNode.querySelector(`#status-label-${item.id}`);
 
@@ -1160,7 +1289,7 @@
             appStates[item.id] = 'pass';
             btnPass.classList.add('active');
             btnFail.classList.remove('active');
-            logSection.classList.remove('expanded');
+            subSection.classList.remove('expanded');
             indicator.className = 'card-status-indicator pass';
             label.className = 'card-status-label pass';
             label.textContent = 'Passed';
@@ -1174,7 +1303,7 @@
           if (appStates[item.id] === 'fail') {
             appStates[item.id] = null;
             btnFail.classList.remove('active');
-            logSection.classList.remove('expanded');
+            subSection.classList.remove('expanded');
             indicator.className = 'card-status-indicator';
             label.className = 'card-status-label';
             label.textContent = 'Untried';
@@ -1182,25 +1311,40 @@
             appStates[item.id] = 'fail';
             btnFail.classList.add('active');
             btnPass.classList.remove('active');
-            logSection.classList.add('expanded');
+            subSection.classList.add('expanded');
             indicator.className = 'card-status-indicator fail';
             label.className = 'card-status-label fail';
             label.textContent = 'Failed';
-            
-            // Auto focus textarea when opening
-            setTimeout(() => textarea.focus(), 150);
           }
           saveWorkspaceState();
           recalculateMetrics();
         });
 
-        // Text area inputs change handler
-        textarea.addEventListener('input', (e) => {
-          appDescriptions[item.id] = e.target.value;
-          saveWorkspaceState();
+        // Bind events to sub-item checkboxes and inputs
+        item.subItems.forEach(sub => {
+          const checkbox = cardNode.querySelector(`#checkbox-${sub.sub_id}`);
+          const inputContainer = cardNode.querySelector(`#input-container-${sub.sub_id}`);
+          const input = cardNode.querySelector(`#input-${sub.sub_id}`);
+
+          checkbox.addEventListener('change', (e) => {
+            const checked = e.target.checked;
+            subCheckboxStates[sub.sub_id] = checked;
+            if (checked) {
+              inputContainer.classList.add('active');
+              setTimeout(() => input.focus(), 50);
+            } else {
+              inputContainer.classList.remove('active');
+            }
+            saveWorkspaceState();
+          });
+
+          input.addEventListener('input', (e) => {
+            subDescriptions[sub.sub_id] = e.target.value;
+            saveWorkspaceState();
+          });
         });
 
-        // Append node to appropriate section
+        // Append card node to the correct section element
         if (item.section === 1) {
           section01El.appendChild(cardNode);
         } else {
@@ -1233,11 +1377,14 @@
 
       // Clear/Reset Workspace buttons handler
       document.getElementById('reset-workspace-btn').addEventListener('click', () => {
-        if (!confirm("Are you sure you want to reset all test passes, failures, and log details?")) return;
+        if (!confirm("Are you sure you want to reset all test passes, failures, and sub-audit log details?")) return;
         
         checklistItems.forEach(item => {
           appStates[item.id] = null;
-          appDescriptions[item.id] = "";
+          item.subItems.forEach(sub => {
+            subCheckboxStates[sub.sub_id] = false;
+            subDescriptions[sub.sub_id] = "";
+          });
         });
 
         saveWorkspaceState();
@@ -1246,27 +1393,39 @@
         showToast("QA workspace reset successfully");
       });
 
-      // Export bugs report button handler
+      // Export bugs report button handler (Itemized telemetry output format)
       document.getElementById('export-bug-report-btn').addEventListener('click', () => {
-        const bugReports = [];
+        const telemetryReport = [];
 
         checklistItems.forEach(item => {
           if (appStates[item.id] === 'fail') {
-            bugReports.push({
-              id: item.id,
-              component: item.title,
-              issueDescription: appDescriptions[item.id] || "No description provided."
+            const subFailures = [];
+            item.subItems.forEach(sub => {
+              if (subCheckboxStates[sub.sub_id] === true) {
+                subFailures.push({
+                  sub_id: sub.sub_id,
+                  label: sub.label,
+                  issueDescription: subDescriptions[sub.sub_id] || "No description provided."
+                });
+              }
+            });
+
+            // Push to parent array
+            telemetryReport.push({
+              parent_id: item.id,
+              parent_component: item.title,
+              sub_failures: subFailures
             });
           }
         });
 
-        if (bugReports.length === 0) {
+        if (telemetryReport.length === 0) {
           showToast("No active bug reports (marked with ✗) to export", true);
           return;
         }
 
         // Generate JSON export payload
-        const jsonContent = JSON.stringify(bugReports, null, 2);
+        const jsonContent = JSON.stringify(telemetryReport, null, 2);
         const blob = new Blob([jsonContent], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         
@@ -1281,7 +1440,7 @@
         document.body.removeChild(downloadLink);
         URL.revokeObjectURL(url);
 
-        showToast(`Exported ${bugReports.length} anomalies to knoots_bugs.json!`);
+        showToast(`Exported ${telemetryReport.length} parent bug lists to knoots_bugs.json!`);
       });
     }
 
