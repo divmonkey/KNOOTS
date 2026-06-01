@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KNOOTS — QA Diagnostic Web Panel</title>
+  
+  <!-- Google Fonts: Mulish & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Mulish:wght@600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* CSS Variables & Theme Definitions */
+    :root {
+      --radius: 6px;
+      --font-title: 'Mulish', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body.theme-dark {
+      --bg-main: #090d16;
+      --bg-card: #111827;
+      --bg-card-hover: #1f2937;
+      --border-color: #1f2937;
+      --border-hover: #374151;
+      --text-primary: #f9fafb;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      --accent: #6366f1;
+      --accent-rgb: 99, 102, 241;
+      --accent-hover: #4f46e5;
+      --accent-light: rgba(99, 102, 241, 0.1);
+      --success: #10b981;
+      --success-light: rgba(16, 185, 129, 0.1);
+      --danger: #ef4444;
+      --danger-light: rgba(239, 68, 68, 0.1);
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --glass-blur: none;
+    }
+
+    body.theme-light {
+      --bg-main: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f1f5f9;
+      --border-color: #e2e8f0;
+      --border-hover: #cbd5e1;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --accent: #4f46e5;
+      --accent-rgb: 79, 70, 229;
+      --accent-hover: #3730a3;
+      --accent-light: rgba(79, 70, 229, 0.08);
+      --success: #059669;
+      --success-light: rgba(5, 150, 105, 0.08);
+      --danger: #dc2626;
+      --danger-light: rgba(220, 38, 38, 0.08);
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+      --glass-blur: none;
+    }
+
+    body.theme-cyberpunk {
+      --bg-main: #000000;
+      --bg-card: #0a0a0c;
+      --bg-card-hover: #141416;
+      --border-color: #ffe600;
+      --border-hover: #00ffff;
+      --text-primary: #ffe600;
+      --text-secondary: #00ffff;
+      --text-muted: #888888;
+      --accent: #ff0055;
+      --accent-rgb: 255, 0, 85;
+      --accent-hover: #ff3377;
+      --accent-light: rgba(255, 0, 85, 0.15);
+      --success: #00ff66;
+      --success-light: rgba(0, 255, 102, 0.15);
+      --danger: #ff0055;
+      --danger-light: rgba(255, 0, 85, 0.15);
+      --shadow: 0 0 10px rgba(255, 230, 0, 0.2);
+      --glass-blur: none;
+    }
+
+    body.theme-glassmorphism {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%) !important;
+      --bg-main: transparent;
+      --bg-card: rgba(30, 41, 59, 0.45);
+      --bg-card-hover: rgba(30, 41, 59, 0.6);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(255, 255, 255, 0.18);
+      --text-primary: #ffffff;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --accent: #ec4899;
+      --accent-rgb: 236, 72, 153;
+      --accent-hover: #db2777;
+      --accent-light: rgba(236, 72, 153, 0.15);
+      --success: #10b981;
+      --success-light: rgba(16, 185, 129, 0.15);
+      --danger: #f43f5e;
+      --danger-light: rgba(244, 63, 94, 0.15);
+      --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      --glass-blur: blur(12px);
+    }
+
+    body.theme-hud {
+      --bg-main: #020617;
+      --bg-card: #050b18;
+      --bg-card-hover: #0a1428;
+      --border-color: #06b6d4;
+      --border-hover: #22d3ee;
+      --text-primary: #06b6d4;
+      --text-secondary: #38bdf8;
+      --text-muted: #0369a1;
+      --accent: #10b981;
+      --accent-rgb: 16, 185, 129;
+      --accent-hover: #059669;
+      --accent-light: rgba(16, 185, 129, 0.1);
+      --success: #10b981;
+      --success-light: rgba(16, 185, 129, 0.15);
+      --danger: #ef4444;
+      --danger-light: rgba(239, 68, 68, 0.15);
+      --shadow: 0 0 15px rgba(6, 182, 212, 0.15);
+      --glass-blur: none;
+    }
+
+    /* Reset and Base Styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg-main);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      line-height: 1.5;
+      transition: var(--transition);
+      padding: 2.5rem 1rem;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    /* Header Section */
+    header {
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      backdrop-filter: var(--glass-blur);
+      padding: 2rem;
+      border-radius: var(--radius);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    .header-title-area {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .header-title-area h1 {
+      font-family: var(--font-title);
+      font-weight: 800;
+      font-size: 1.75rem;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .header-title-area p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      letter-spacing: 0.01em;
+    }
+
+    .theme-selector {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      background: rgba(0, 0, 0, 0.15);
+      padding: 0.25rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-color);
+      flex-wrap: wrap;
+    }
+
+    .theme-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      padding: 0.5rem 0.85rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: var(--radius);
+      transition: var(--transition);
+      font-family: var(--font-body);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .theme-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .theme-btn.active {
+      background: var(--accent);
+      color: #ffffff !important;
+    }
+
+    /* Stats Dashboard Card */
+    .stats-card {
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      backdrop-filter: var(--glass-blur);
+      padding: 1.5rem 2rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .stat-value {
+      font-family: var(--font-title);
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    /* Progress bar styling */
+    .progress-bar-container {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      border: 1px solid var(--border-color);
+    }
+
+    .progress-pass {
+      background-color: var(--success);
+      width: 0%;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .progress-fail {
+      background-color: var(--danger);
+      width: 0%;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .progress-pending {
+      background-color: rgba(255, 255, 255, 0.1);
+      width: 100%;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body.theme-light .progress-pending {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    /* Section Header */
+    .section-title {
+      font-family: var(--font-title);
+      font-weight: 700;
+      font-size: 1.25rem;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 0.5rem;
+      margin-top: 1rem;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-number {
+      font-size: 0.9rem;
+      background: var(--accent-light);
+      color: var(--accent);
+      padding: 0.15rem 0.5rem;
+      border-radius: var(--radius);
+      font-family: var(--font-body);
+      font-weight: 600;
+    }
+
+    /* Cards Grid Layout */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    /* Card Styling */
+    .card {
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      backdrop-filter: var(--glass-blur);
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      transition: var(--transition);
+      box-shadow: var(--shadow);
+    }
+
+    .card:hover {
+      border-color: var(--border-hover);
+      background: var(--bg-card-hover);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-id {
+      font-family: monospace;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: rgba(0, 0, 0, 0.2);
+      padding: 0.15rem 0.4rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-color);
+    }
+
+    body.theme-light .card-id {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    .card h2 {
+      font-family: var(--font-title);
+      font-weight: 700;
+      font-size: 1.15rem;
+      line-height: 1.3;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+
+    .card-target {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: -0.5rem;
+    }
+
+    .card-target span {
+      font-weight: 500;
+      color: var(--text-secondary);
+      font-family: monospace;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 0.05rem 0.25rem;
+      border-radius: 3px;
+    }
+
+    body.theme-light .card-target span {
+      background: rgba(0, 0, 0, 0.03);
+    }
+
+    .card-criteria {
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      flex-grow: 1;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.625rem;
+      border-radius: var(--radius);
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-visual {
+      background: rgba(139, 92, 246, 0.15);
+      color: #a78bfa;
+    }
+    .theme-light .badge-visual {
+      background: rgba(139, 92, 246, 0.1);
+      color: #7c3aed;
+    }
+
+    .badge-editor {
+      background: rgba(99, 102, 241, 0.15);
+      color: #a5b4fc;
+    }
+    .theme-light .badge-editor {
+      background: rgba(99, 102, 241, 0.1);
+      color: #4f46e5;
+    }
+
+    .badge-responsive {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fcd34d;
+    }
+    .theme-light .badge-responsive {
+      background: rgba(245, 158, 11, 0.1);
+      color: #d97706;
+    }
+
+    .badge-functional {
+      background: rgba(59, 130, 246, 0.15);
+      color: #93c5fd;
+    }
+    .theme-light .badge-functional {
+      background: rgba(59, 130, 246, 0.1);
+      color: #2563eb;
+    }
+
+    .badge-security {
+      background: rgba(239, 68, 68, 0.15);
+      color: #fca5a5;
+    }
+    .theme-light .badge-security {
+      background: rgba(239, 68, 68, 0.1);
+      color: #dc2626;
+    }
+
+    .badge-sync {
+      background: rgba(20, 184, 166, 0.15);
+      color: #99f6e4;
+    }
+    .theme-light .badge-sync {
+      background: rgba(20, 184, 166, 0.1);
+      color: #0d9488;
+    }
+
+    body.theme-cyberpunk .badge {
+      background: transparent !important;
+      border: 1px solid currentColor !important;
+    }
+
+    body.theme-hud .badge {
+      background: rgba(6, 182, 212, 0.05) !important;
+      border: 1px solid currentColor !important;
+    }
+
+    .badge svg {
+      flex-shrink: 0;
+    }
+
+    /* Card controls and actions */
+    .card-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border-color);
+      padding-top: 1rem;
+      gap: 1rem;
+    }
+
+    .card-status-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-status-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--text-muted);
+      transition: var(--transition);
+    }
+
+    .card-status-indicator.pass {
+      background-color: var(--success);
+      box-shadow: 0 0 8px var(--success);
+    }
+
+    .card-status-indicator.fail {
+      background-color: var(--danger);
+      box-shadow: 0 0 8px var(--danger);
+    }
+
+    .card-status-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .card-status-label.pass {
+      color: var(--success);
+    }
+
+    .card-status-label.fail {
+      color: var(--danger);
+    }
+
+    .btn-pair {
+      display: flex;
+      gap: 0.35rem;
+      background: rgba(0, 0, 0, 0.15);
+      padding: 0.2rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-color);
+    }
+
+    body.theme-light .btn-pair {
+      background: rgba(0, 0, 0, 0.03);
+    }
+
+    .btn-opt {
+      width: 2.25rem;
+      height: 2.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: var(--radius);
+      transition: var(--transition);
+      font-family: var(--font-body);
+    }
+
+    .btn-opt:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    body.theme-light .btn-opt:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    /* Active states for pass/fail options */
+    .btn-opt-pass.active {
+      background: var(--success) !important;
+      color: #ffffff !important;
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-opt-fail.active {
+      background: var(--danger) !important;
+      color: #ffffff !important;
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+    }
+
+    /* Error logging section style */
+    .error-log-section {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1), padding 0.25s, border 0.25s;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding: 0;
+      border-top: 1px solid transparent;
+    }
+
+    .error-log-section.expanded {
+      max-height: 140px; 
+      border-top: 1px dashed var(--border-color);
+      padding-top: 0.75rem;
+      margin-top: 0.5rem;
+    }
+
+    .error-log-label {
+      font-size: 0.75rem;
+      color: var(--danger);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .error-log-textarea {
+      width: 100%;
+      height: 70px;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 0.5rem 0.75rem;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      resize: none;
+      transition: var(--transition);
+    }
+
+    body.theme-light .error-log-textarea {
+      background: rgba(0, 0, 0, 0.02);
+    }
+
+    .error-log-textarea:focus {
+      outline: none;
+      border-color: var(--danger);
+      box-shadow: 0 0 0 2px var(--danger-light);
+    }
+
+    /* Floating Actions or Footer Row */
+    .footer-actions {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 1rem;
+      border-top: 1px solid var(--border-color);
+      padding-top: 1.5rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #ffffff;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 10px rgba(var(--accent-rgb), 0.25);
+      font-family: var(--font-body);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      box-shadow: 0 4px 14px rgba(var(--accent-rgb), 0.4);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-body);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+      border-color: var(--border-hover);
+    }
+
+    body.theme-light .btn-secondary:hover {
+      background: rgba(0, 0, 0, 0.03);
+    }
+
+    /* Theme-specific custom overrides for elements */
+    .theme-cyberpunk .stats-card,
+    .theme-cyberpunk header,
+    .theme-cyberpunk .card,
+    .theme-cyberpunk .theme-selector {
+      border: 1px solid var(--border-color) !important;
+      box-shadow: 0 0 10px rgba(255, 230, 0, 0.15) !important;
+    }
+
+    .theme-cyberpunk .theme-btn.active {
+      background: #ffe600 !important;
+      color: #000000 !important;
+    }
+
+    .theme-cyberpunk .btn-primary {
+      background: #ff0055 !important;
+      color: #ffffff !important;
+      border: 1px solid #ff0055 !important;
+      box-shadow: 0 0 10px rgba(255, 0, 85, 0.4) !important;
+    }
+    .theme-cyberpunk .btn-primary:hover {
+      background: #ffe600 !important;
+      color: #000000 !important;
+      border-color: #ffe600 !important;
+      box-shadow: 0 0 15px rgba(255, 230, 0, 0.5) !important;
+    }
+
+    .theme-hud .stats-card,
+    .theme-hud header,
+    .theme-hud .card,
+    .theme-hud .theme-selector {
+      border: 1px solid var(--border-color) !important;
+      background: rgba(2, 6, 23, 0.8) !important;
+      box-shadow: 0 0 8px rgba(6, 182, 212, 0.1) !important;
+    }
+
+    .theme-hud .theme-btn.active {
+      background: #06b6d4 !important;
+      color: #020617 !important;
+    }
+
+    .theme-hud .btn-primary {
+      background: #06b6d4 !important;
+      color: #020617 !important;
+      box-shadow: 0 0 10px rgba(6, 182, 212, 0.3) !important;
+    }
+    .theme-hud .btn-primary:hover {
+      background: #22d3ee !important;
+      color: #020617 !important;
+    }
+
+    /* Toast Message */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #10b981;
+      color: #ffffff;
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transform: translateY(150%);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1000;
+      font-family: var(--font-body);
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast.toast-error {
+      background: #ef4444;
+    }
+
+    .toast-icon {
+      font-size: 1.1rem;
+    }
+  </style>
+</head>
+<body class="theme-dark">
+
+  <div class="container">
+    
+    <!-- Header Command Panel -->
+    <header>
+      <div class="header-title-area">
+        <h1>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent);">
+            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+          KNOOTS // QA Diagnostic Panel
+        </h1>
+        <p>Automated verification workspace and bug telemetry reporter</p>
+      </div>
+      
+      <!-- Theme Selection Matrix -->
+      <div class="theme-selector" id="theme-selector-container">
+        <button class="theme-btn" data-theme="theme-dark">Dark</button>
+        <button class="theme-btn" data-theme="theme-light">Light</button>
+        <button class="theme-btn" data-theme="theme-cyberpunk">Cyberpunk</button>
+        <button class="theme-btn" data-theme="theme-glassmorphism">Glass</button>
+        <button class="theme-btn" data-theme="theme-hud">HUD</button>
+      </div>
+    </header>
+
+    <!-- Telemetry & Metrics Dashboard -->
+    <div class="stats-card">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-label">Total Audit Cards</div>
+          <div class="stat-value" id="stats-total">7</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Passed Tests</div>
+          <div class="stat-value" style="color: var(--success);" id="stats-passed">0</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Failed Anomalies</div>
+          <div class="stat-value" style="color: var(--danger);" id="stats-failed">0</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Pending Reviews</div>
+          <div class="stat-value" style="color: var(--text-muted);" id="stats-pending">7</div>
+        </div>
+      </div>
+      
+      <!-- Dynamic Progress Indicator -->
+      <div class="progress-bar-container">
+        <div class="progress-pass" id="bar-pass"></div>
+        <div class="progress-fail" id="bar-fail"></div>
+        <div class="progress-pending" id="bar-pending"></div>
+      </div>
+    </div>
+
+    <!-- Section 01: Design & UI/UX Presentation -->
+    <div>
+      <h2 class="section-title">
+        <span class="section-number">01</span>
+        Design & UI/UX Presentation
+      </h2>
+      <div class="cards-grid" style="margin-top: 1rem;" id="section-01-container">
+        <!-- JS will populate these cards -->
+      </div>
+    </div>
+
+    <!-- Section 02: System Features & Operations -->
+    <div>
+      <h2 class="section-title">
+        <span class="section-number">02</span>
+        System Features & Operations
+      </h2>
+      <div class="cards-grid" style="margin-top: 1rem;" id="section-02-container">
+        <!-- JS will populate these cards -->
+      </div>
+    </div>
+
+    <!-- Workspace Controls -->
+    <div class="footer-actions">
+      <button class="btn-secondary" id="reset-workspace-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+          <path d="M3 3v5h5"/>
+        </svg>
+        Reset Workspace States
+      </button>
+      <button class="btn-primary" id="export-bug-report-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Export Bug Log Report
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Toast Notification Box -->
+  <div class="toast" id="qa-toast">
+    <span class="toast-icon">✓</span>
+    <span class="toast-text" id="qa-toast-text">Workspace states auto-saved.</span>
+  </div>
+
+  <script>
+    // Configuration checklist items array
+    const checklistItems = [
+      {
+        id: "theme-contrast",
+        section: 1,
+        title: "Theme Matrix & Font Contrast Legibility",
+        badge: "Visual",
+        badgeClass: "badge-visual",
+        badgeIcon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
+        target: "Global CSS Variables & Typography Themes",
+        criteria: "Verify background fills and typography tokens maintain readable contrast across Dark, Light, Cyberpunk, Glassmorphism, and Futuristic HUD styles. Ensure active theme panels load text without muddy blending or color clipping."
+      },
+      {
+        id: "tag-icon-ui",
+        section: 1,
+        title: "Tags & Icons Alignment Matrix",
+        badge: "Visual",
+        badgeClass: "badge-visual",
+        badgeIcon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
+        target: "Sidebar Components & Tag Group Containers",
+        criteria: "Check that custom assigned SVG or Emoji icons align with the font baseline inside the navigation cards. Verify primary tag accent borders use the correct layout color and margins without overlapping adjacent labels."
+      },
+      {
+        id: "editor-quirks",
+        section: 1,
+        title: "Workspace Editor Quirks & Dynamic Layouts",
+        badge: "Editor",
+        badgeClass: "badge-editor",
+        badgeIcon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`,
+        target: "Markdown & WYSIWYG Code Editor Elements",
+        criteria: "Inspect the split-pane live preview layouts under maximum content load. Watch out for shifting columns caused by dynamic vertical scrollbars, text clipping, or improper line-height spacing on code block highlights."
+      },
+      {
+        id: "settings-modal-responsive",
+        section: 1,
+        title: "Settings Overlay Window Viewport Adjustments",
+        badge: "Responsive",
+        badgeClass: "badge-responsive",
+        badgeIcon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>`,
+        target: "Navigation Drawer & Settings Modal",
+        criteria: "Trigger the settings slide-in panel. Audit mobile responsive scaling down to ultra-narrow 360px viewports. The form inputs, typography adjustments, and theme toggle buttons must wrap cleanly without broken vertical layouts."
+      },
+      {
+        id: "core-crud",
+        section: 2,
+        title: "Core Document Operations & Live Search",
+        badge: "Functional",
+        badgeClass: "badge-functional",
+        badgeIcon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
+        target: "File Tree Management & Search Modals",
+        criteria: "Test rapid note creation, folder renaming workflows, and directory migrations. Verify the fast local search index performs real-time, instantaneous filtering on full-text keys as characters are entered."
+      },
+      {
+        id: "crypto-sandbox",
+        section: 2,
+        title: "Zero-Knowledge AES-GCM Sandbox Isolation",
+        badge: "Security",
+        badgeClass: "badge-security",
+        badgeIcon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`,
+        target: "Encryption Pipeline & IndexedDB Storage",
+        criteria: "Input a secure master passphrase to lock the database. Force a hard browser page reset. Confirm that note titles, file contents, and sensitive metadata remain entirely encrypted inside local storage caches until decrypted."
+      },
+      {
+        id: "sync-indicators",
+        section: 2,
+        title: "Offline Caching & Sync Indicators",
+        badge: "Sync",
+        badgeClass: "badge-sync",
+        badgeIcon: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>`,
+        target: "Network Monitoring Layer & UI Badges",
+        criteria: "Programmatically disconnect the network interface. Edit notes to confirm the optimistic UI model updates and caches data using IndexedDB. Reconnect the network and verify the background synchronization indicators switch from offline to live states cleanly."
+      }
+    ];
+
+    // Local state stores
+    let appStates = {};       // id -> 'pass' / 'fail' / null
+    let appDescriptions = {}; // id -> string (issue description text)
+    let activeTheme = 'theme-dark';
+
+    // Elements cache
+    const section01El = document.getElementById('section-01-container');
+    const section02El = document.getElementById('section-02-container');
+    const toastEl = document.getElementById('qa-toast');
+    const toastTextEl = document.getElementById('qa-toast-text');
+
+    // Display a custom toast notification
+    function showToast(message, isError = false) {
+      toastTextEl.textContent = message;
+      if (isError) {
+        toastEl.classList.add('toast-error');
+        toastEl.querySelector('.toast-icon').textContent = '✗';
+      } else {
+        toastEl.classList.remove('toast-error');
+        toastEl.querySelector('.toast-icon').textContent = '✓';
+      }
+      toastEl.classList.add('show');
+      setTimeout(() => {
+        toastEl.classList.remove('show');
+      }, 3000);
+    }
+
+    // Initialize application state from local persistence storage
+    function loadWorkspaceState() {
+      try {
+        const storedStates = localStorage.getItem('knoots-qa-states');
+        const storedDescs = localStorage.getItem('knoots-qa-descriptions');
+        const storedTheme = localStorage.getItem('knoots-qa-theme');
+
+        if (storedStates) appStates = JSON.parse(storedStates);
+        if (storedDescs) appDescriptions = JSON.parse(storedDescs);
+        if (storedTheme) activeTheme = storedTheme;
+
+        // Initialize state for items that don't have stored values
+        checklistItems.forEach(item => {
+          if (appStates[item.id] === undefined) appStates[item.id] = null;
+          if (appDescriptions[item.id] === undefined) appDescriptions[item.id] = "";
+        });
+
+        // Set the active theme classes
+        document.body.className = activeTheme;
+        const themeButtons = document.querySelectorAll('.theme-btn');
+        themeButtons.forEach(btn => {
+          if (btn.getAttribute('data-theme') === activeTheme) {
+            btn.classList.add('active');
+          } else {
+            btn.classList.remove('active');
+          }
+        });
+
+      } catch (err) {
+        console.error("Failed to load local storage configurations:", err);
+      }
+    }
+
+    // Save states to local storage
+    function saveWorkspaceState() {
+      localStorage.setItem('knoots-qa-states', JSON.stringify(appStates));
+      localStorage.setItem('knoots-qa-descriptions', JSON.stringify(appDescriptions));
+    }
+
+    // Recalculate metrics and update telemetry bars
+    function recalculateMetrics() {
+      let passedCount = 0;
+      let failedCount = 0;
+      let pendingCount = 0;
+      const totalCount = checklistItems.length;
+
+      checklistItems.forEach(item => {
+        const state = appStates[item.id];
+        if (state === 'pass') passedCount++;
+        else if (state === 'fail') failedCount++;
+        else pendingCount++;
+      });
+
+      // Update counters
+      document.getElementById('stats-passed').textContent = passedCount;
+      document.getElementById('stats-failed').textContent = failedCount;
+      document.getElementById('stats-pending').textContent = pendingCount;
+      document.getElementById('stats-total').textContent = totalCount;
+
+      // Update progress bar percentages
+      const passPct = (passedCount / totalCount) * 100;
+      const failPct = (failedCount / totalCount) * 100;
+      const pendingPct = (pendingCount / totalCount) * 100;
+
+      document.getElementById('bar-pass').style.width = passPct + '%';
+      document.getElementById('bar-fail').style.width = failPct + '%';
+      document.getElementById('bar-pending').style.width = pendingPct + '%';
+    }
+
+    // Render all QA checkcards to their respective containers
+    function renderChecklistCards() {
+      section01El.innerHTML = "";
+      section02El.innerHTML = "";
+
+      checklistItems.forEach(item => {
+        const itemState = appStates[item.id];
+        const isPassed = itemState === 'pass';
+        const isFailed = itemState === 'fail';
+
+        // Determine badge markup
+        const badgeMarkup = `
+          <span class="badge ${item.badgeClass}">
+            ${item.badgeIcon}
+            ${item.badge}
+          </span>
+        `;
+
+        // Create card element
+        const cardNode = document.createElement('div');
+        cardNode.className = 'card';
+        cardNode.id = `card-${item.id}`;
+
+        cardNode.innerHTML = `
+          <div class="card-header">
+            ${badgeMarkup}
+            <div class="card-id">ID: ${item.id}</div>
+          </div>
+          <h2>${item.title}</h2>
+          <div class="card-target">Target: <span>${item.target}</span></div>
+          <p class="card-criteria">${item.criteria}</p>
+          
+          <div class="card-actions">
+            <div class="card-status-container">
+              <div class="card-status-indicator ${itemState || ''}" id="indicator-${item.id}"></div>
+              <span class="card-status-label ${itemState || ''}" id="status-label-${item.id}">
+                ${itemState === 'pass' ? 'Passed' : itemState === 'fail' ? 'Failed' : 'Untried'}
+              </span>
+            </div>
+            
+            <div class="btn-pair">
+              <button class="btn-opt btn-opt-pass ${isPassed ? 'active' : ''}" 
+                      id="btn-pass-${item.id}" 
+                      title="Mark as Passed">✓</button>
+              <button class="btn-opt btn-opt-fail ${isFailed ? 'active' : ''}" 
+                      id="btn-fail-${item.id}" 
+                      title="Mark as Failed">✗</button>
+            </div>
+          </div>
+
+          <div class="error-log-section ${isFailed ? 'expanded' : ''}" id="log-section-${item.id}">
+            <div class="error-log-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+              Describe Failure Anomaly:
+            </div>
+            <textarea class="error-log-textarea" 
+                      id="textarea-${item.id}" 
+                      placeholder="Input console details, layout shift details, or sync failures...">${appDescriptions[item.id] || ''}</textarea>
+          </div>
+        `;
+
+        // Bind events
+        const btnPass = cardNode.querySelector(`#btn-pass-${item.id}`);
+        const btnFail = cardNode.querySelector(`#btn-fail-${item.id}`);
+        const logSection = cardNode.querySelector(`#log-section-${item.id}`);
+        const textarea = cardNode.querySelector(`#textarea-${item.id}`);
+        const indicator = cardNode.querySelector(`#indicator-${item.id}`);
+        const label = cardNode.querySelector(`#status-label-${item.id}`);
+
+        // PASS toggle action handler
+        btnPass.addEventListener('click', () => {
+          if (appStates[item.id] === 'pass') {
+            appStates[item.id] = null;
+            btnPass.classList.remove('active');
+            indicator.className = 'card-status-indicator';
+            label.className = 'card-status-label';
+            label.textContent = 'Untried';
+          } else {
+            appStates[item.id] = 'pass';
+            btnPass.classList.add('active');
+            btnFail.classList.remove('active');
+            logSection.classList.remove('expanded');
+            indicator.className = 'card-status-indicator pass';
+            label.className = 'card-status-label pass';
+            label.textContent = 'Passed';
+          }
+          saveWorkspaceState();
+          recalculateMetrics();
+        });
+
+        // FAIL toggle action handler
+        btnFail.addEventListener('click', () => {
+          if (appStates[item.id] === 'fail') {
+            appStates[item.id] = null;
+            btnFail.classList.remove('active');
+            logSection.classList.remove('expanded');
+            indicator.className = 'card-status-indicator';
+            label.className = 'card-status-label';
+            label.textContent = 'Untried';
+          } else {
+            appStates[item.id] = 'fail';
+            btnFail.classList.add('active');
+            btnPass.classList.remove('active');
+            logSection.classList.add('expanded');
+            indicator.className = 'card-status-indicator fail';
+            label.className = 'card-status-label fail';
+            label.textContent = 'Failed';
+            
+            // Auto focus textarea when opening
+            setTimeout(() => textarea.focus(), 150);
+          }
+          saveWorkspaceState();
+          recalculateMetrics();
+        });
+
+        // Text area inputs change handler
+        textarea.addEventListener('input', (e) => {
+          appDescriptions[item.id] = e.target.value;
+          saveWorkspaceState();
+        });
+
+        // Append node to appropriate section
+        if (item.section === 1) {
+          section01El.appendChild(cardNode);
+        } else {
+          section02El.appendChild(cardNode);
+        }
+      });
+    }
+
+    // Set up global triggers and workspace action button handlers
+    function setupWorkspaceEvents() {
+      // Theme switching click handler
+      const themeSelector = document.getElementById('theme-selector-container');
+      themeSelector.addEventListener('click', (e) => {
+        const btn = e.target.closest('.theme-btn');
+        if (!btn) return;
+
+        const selectedTheme = btn.getAttribute('data-theme');
+        activeTheme = selectedTheme;
+        document.body.className = selectedTheme;
+        
+        // Update active class on buttons
+        themeSelector.querySelectorAll('.theme-btn').forEach(b => {
+          if (b === btn) b.classList.add('active');
+          else b.classList.remove('active');
+        });
+
+        localStorage.setItem('knoots-qa-theme', activeTheme);
+        showToast(`Theme switched to ${btn.textContent} mode`);
+      });
+
+      // Clear/Reset Workspace buttons handler
+      document.getElementById('reset-workspace-btn').addEventListener('click', () => {
+        if (!confirm("Are you sure you want to reset all test passes, failures, and log details?")) return;
+        
+        checklistItems.forEach(item => {
+          appStates[item.id] = null;
+          appDescriptions[item.id] = "";
+        });
+
+        saveWorkspaceState();
+        renderChecklistCards();
+        recalculateMetrics();
+        showToast("QA workspace reset successfully");
+      });
+
+      // Export bugs report button handler
+      document.getElementById('export-bug-report-btn').addEventListener('click', () => {
+        const bugReports = [];
+
+        checklistItems.forEach(item => {
+          if (appStates[item.id] === 'fail') {
+            bugReports.push({
+              id: item.id,
+              component: item.title,
+              issueDescription: appDescriptions[item.id] || "No description provided."
+            });
+          }
+        });
+
+        if (bugReports.length === 0) {
+          showToast("No active bug reports (marked with ✗) to export", true);
+          return;
+        }
+
+        // Generate JSON export payload
+        const jsonContent = JSON.stringify(bugReports, null, 2);
+        const blob = new Blob([jsonContent], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        
+        // Trigger browser click download
+        const downloadLink = document.createElement('a');
+        downloadLink.href = url;
+        downloadLink.download = 'knoots_bugs.json';
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        
+        // Cleanup download link
+        document.body.removeChild(downloadLink);
+        URL.revokeObjectURL(url);
+
+        showToast(`Exported ${bugReports.length} anomalies to knoots_bugs.json!`);
+      });
+    }
+
+    // App bootstrapping init sequence
+    window.addEventListener('DOMContentLoaded', () => {
+      loadWorkspaceState();
+      renderChecklistCards();
+      recalculateMetrics();
+      setupWorkspaceEvents();
+    });
+  </script>
+</body>
+</html>
